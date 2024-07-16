@@ -241,6 +241,7 @@ class IdentifiableSubTypes(Enum):
     SWC_INTERNAL_BEHAVIOR = 47
     UNIT = 48
     VARIABLE_DATA_PROTOTYPE = 49
+    TRANSFORMATION_TECHNOLOGY = 50
 
 
 class IntervalType(Enum):
@@ -742,6 +743,7 @@ xml_to_enum_map: dict[str, dict] = {
         "SWC-INTERNAL-BEHAVIOR": IdentifiableSubTypes.SWC_INTERNAL_BEHAVIOR,
         "UNIT": IdentifiableSubTypes.UNIT,
         "VARIABLE-DATA-PROTOTYPE": IdentifiableSubTypes.VARIABLE_DATA_PROTOTYPE,
+        "TRANSFORMATION-TECHNOLOGY": IdentifiableSubTypes.TRANSFORMATION_TECHNOLOGY,
     },
     "IntervalType": {
         "CLOSED": IntervalType.CLOSED,

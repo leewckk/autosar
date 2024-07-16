@@ -12,7 +12,6 @@ from autosar.base import split_ref, Searchable
 import autosar.xml.enumeration as ar_enum
 import autosar.xml.exception as ar_except
 
-
 alignment_type_re = re.compile(
     r"[1-9][0-9]*|0[xX][0-9a-fA-F]*|0[bB][0-1]+|0[0-7]*|UNSPECIFIED|UNKNOWN|BOOLEAN|PTR")
 
@@ -22,28 +21,29 @@ display_format_str_re = re.compile(
 # Type aliases
 
 ValueSpecificationElement = Union["TextValueSpecification",
-                                  "NumericalValueSpecification",
-                                  "NotAvailableValueSpecification",
-                                  "ArrayValueSpecification",
-                                  "RecordValueSpecification",
-                                  "ApplicationValueSpecification",
-                                  "ConstantReference"]
+"NumericalValueSpecification",
+"NotAvailableValueSpecification",
+"ArrayValueSpecification",
+"RecordValueSpecification",
+"ApplicationValueSpecification",
+"ConstantReference"]
 
 PortPrototypeElement = Union["ProvidePortPrototype",
-                             "RequirePortPrototype",
-                             "PRPortPrototype"]
+"RequirePortPrototype",
+"PRPortPrototype"]
 
 SwConnectorElement = Union["AssemblySwConnector",
-                           "DelegationSwConnector",
-                           "PassThroughSwConnector"]
+"DelegationSwConnector",
+"PassThroughSwConnector"]
 
 InitValueArgType = Union["int",
-                         "float",
-                         "str",
-                         "list",
-                         "tuple",
-                         "ValueSpecificationElement",
-                         "ConstantRef"]
+"float",
+"str",
+"list",
+"tuple",
+"ValueSpecificationElement",
+"ConstantRef"]
+
 
 # Helper classes
 
@@ -119,6 +119,7 @@ class PositiveIntegerValue:
             return value
         else:
             raise TypeError(f"Unexpected type for value {str(type(value))}")
+
 
 # Base classes
 
@@ -377,6 +378,7 @@ class ARElement(CollectableElement):
     Type: Abstract
     """
 
+
 # Common structure elements
 
 
@@ -404,7 +406,7 @@ class DataFilter(ARObject):
                  mask: int | None = None,
                  offset: int | None = None,
                  period: int | None = None,
-                 x: int | None = None,                # pylint: disable=C0103
+                 x: int | None = None,  # pylint: disable=C0103
                  ) -> None:
         super().__init__()
         self.data_filter_type: ar_enum.DataFilterType | None = None
@@ -413,7 +415,7 @@ class DataFilter(ARObject):
         self.mask: int | None = None
         self.offset: int | None = None
         self.period: int | None = None
-        self.x: int | None = None                     # pylint: disable=C0103
+        self.x: int | None = None  # pylint: disable=C0103
         self._assign_optional("data_filter_type", data_filter_type, ar_enum.DataFilterType)  # .DATA-FILTER-TYPE
         self._assign_optional("mask", mask, int)  # .MASK
         self._assign_optional("max_val", max_val, int)  # .MAX
@@ -517,6 +519,7 @@ class Implementation(ARElement):
             self.code_descriptors.append(code_descriptors)
         else:
             raise TypeError("code_descriptors must be of type Code")
+
 
 # --- Reference elements
 
@@ -999,6 +1002,7 @@ class SwcImplementationRef(BaseRef):
         """Acceptable values for dest"""
         return {ar_enum.IdentifiableSubTypes.SWC_IMPLEMENTATION}
 
+
 # --- Documentation Elements
 
 
@@ -1200,7 +1204,7 @@ class MultilanguageLongName(ARObject):
 
     def __init__(self,
                  long_name: None | tuple[ar_enum.Language,
-                                         str] | LanguageLongName = None) -> None:
+                 str] | LanguageLongName = None) -> None:
         self.elements: list[LanguageLongName] = []
         if long_name is not None:
             if isinstance(long_name, LanguageLongName):
@@ -1257,7 +1261,7 @@ class MultiLanguageOverviewParagraph(ARObject):
 
     def __init__(self,
                  paragraph: None | tuple[ar_enum.Language,
-                                         str] | LanguageOverviewParagraph = None) -> None:
+                 str] | LanguageOverviewParagraph = None) -> None:
         self.elements: list[LanguageOverviewParagraph] = []
         if paragraph is not None:
             if isinstance(paragraph, LanguageOverviewParagraph):
@@ -1396,7 +1400,7 @@ class MultiLanguageParagraph(Paginateable):
 
     def __init__(self,
                  paragraph: None | tuple[ar_enum.Language,
-                                         str] | LanguageParagraph = None,
+                 str] | LanguageParagraph = None,
                  help_entry: None | str = None,
                  **kwargs) -> None:
         super().__init__(**kwargs)
@@ -1473,7 +1477,7 @@ class MultiLanguageVerbatim(Paginateable):
 
     def __init__(self,
                  element: None | tuple[ar_enum.Language,
-                                       str] | LanguageVerbatim = None,
+                 str] | LanguageVerbatim = None,
                  allow_break: None | str = None,
                  float: None | ar_enum.Float = None,  # pylint: disable=redefined-builtin
                  page_wide: None | ar_enum.PageWide = None,
@@ -1701,13 +1705,13 @@ class CompuScale(ARObject):
                  inverse_value: CompuConst | None = None,
                  lower_limit_type: ar_enum.IntervalType = ar_enum.IntervalType.CLOSED,
                  upper_limit_type: ar_enum.IntervalType = ar_enum.IntervalType.CLOSED) -> None:
-        self.content = content                      # CHOICE(COMPU-SCALE-CONSTANT-CONTENTS, COMPU-SCALE-RATIONAL-FORMULA) # noqa E501 pylint: disable=C0301
-        self.lower_limit = lower_limit              # .LOWER-LIMIT
-        self.upper_limit = upper_limit              # .UPPER-LIMIT
-        self.label = label                          # .SHORT-LABEL
-        self.symbol = symbol                        # .SYMBOL
-        self.desc = desc                            # .DESC
-        self.mask = mask                            # .MASK
+        self.content = content  # CHOICE(COMPU-SCALE-CONSTANT-CONTENTS, COMPU-SCALE-RATIONAL-FORMULA) # noqa E501 pylint: disable=C0301
+        self.lower_limit = lower_limit  # .LOWER-LIMIT
+        self.upper_limit = upper_limit  # .UPPER-LIMIT
+        self.label = label  # .SHORT-LABEL
+        self.symbol = symbol  # .SYMBOL
+        self.desc = desc  # .DESC
+        self.mask = mask  # .MASK
         self.inverse_value: CompuConst | None = None  # .COMPU-INVERSE-VALUE
         if inverse_value is not None:
             if isinstance(inverse_value, CompuConst):
@@ -1716,8 +1720,8 @@ class CompuScale(ARObject):
                 self.inverse_value = CompuConst(inverse_value)
             else:
                 raise TypeError(f"Invalid type for 'inverse_value': {str(type(inverse_value))}")
-        self.lower_limit_type = lower_limit_type    # .LOWER-LIMIT@INTERVAL-TYPE
-        self.upper_limit_type = upper_limit_type    # .UPPER-LIMIT@INTERVAL-TYPE
+        self.lower_limit_type = lower_limit_type  # .LOWER-LIMIT@INTERVAL-TYPE
+        self.upper_limit_type = upper_limit_type  # .UPPER-LIMIT@INTERVAL-TYPE
         # .VARIATION-POINT not supported
 
     @property
@@ -1831,9 +1835,9 @@ class CompuMethod(ARElement):
                  display_format: str | None = None,
                  **kwargs) -> None:
         super().__init__(name, **kwargs)
-        self.int_to_phys = int_to_phys        # .COMPU-INTERNAL-TO-PHYS
-        self.phys_to_int = phys_to_int        # .COMPU-PHYS-TO-INTERNAL
-        self.unit_ref = unit_ref              # .UNIT-REF
+        self.int_to_phys = int_to_phys  # .COMPU-INTERNAL-TO-PHYS
+        self.phys_to_int = phys_to_int  # .COMPU-PHYS-TO-INTERNAL
+        self.unit_ref = unit_ref  # .UNIT-REF
         self.display_format = display_format  # .DISPLAY-FORMAT
 
     def ref(self) -> CompuMethodRef | None:
@@ -1861,10 +1865,10 @@ class LimitObject(ARObject):
                  lower_limit_type: ar_enum.IntervalType = ar_enum.IntervalType.CLOSED,
                  upper_limit_type: ar_enum.IntervalType = ar_enum.IntervalType.CLOSED) -> None:
 
-        self.lower_limit = lower_limit              # .LOWER-LIMIT
-        self.upper_limit = upper_limit              # .UPPER-LIMIT
-        self.lower_limit_type = lower_limit_type    # .LOWER-LIMIT@INTERVAL-TYPE
-        self.upper_limit_type = upper_limit_type    # .UPPER-LIMIT@INTERVAL-TYPE
+        self.lower_limit = lower_limit  # .LOWER-LIMIT
+        self.upper_limit = upper_limit  # .UPPER-LIMIT
+        self.lower_limit_type = lower_limit_type  # .LOWER-LIMIT@INTERVAL-TYPE
+        self.upper_limit_type = upper_limit_type  # .UPPER-LIMIT@INTERVAL-TYPE
 
     @property
     def is_empty(self) -> bool:
@@ -1996,9 +2000,9 @@ class DataConstraintRule(ARObject):
                  internal: InternalConstraint | None = None,
                  physical: PhysicalConstraint | None = None,
                  level: int | None = None) -> None:
-        self.internal = internal   # .INTERNAL-CONSTRS
-        self.physical = physical   # .PHYS-CONSTRS
-        self.level = level         # .CONSTR-LEVEL
+        self.internal = internal  # .INTERNAL-CONSTRS
+        self.physical = physical  # .PHYS-CONSTRS
+        self.level = level  # .CONSTR-LEVEL
 
 
 class DataConstraint(ARElement):
@@ -2081,6 +2085,7 @@ class DataConstraint(ARElement):
                                                               lower_limit_type,
                                                               upper_limit_type))
         return cls(name, [rule], **kwargs)
+
 
 # Unit elements
 
@@ -2211,10 +2216,10 @@ class SwTextProps(ARObject):
                  base_type_ref: SwBaseTypeRef | str | None = None,
                  fill_char: int | None = None,
                  ):
-        self.array_size_semantics: ar_enum.ArraySizeSemantics | None = None   # .ARRAY-SIZE-SEMANTICS
-        self.max_text_size: int | None = None                                 # .SW-MAX-TEXT-SIZE
-        self.base_type_ref: SwBaseTypeRef | str | None = None                 # .BASE-TYPE-REF
-        self.fill_char: int | None = None                                     # .FILL-CHAR
+        self.array_size_semantics: ar_enum.ArraySizeSemantics | None = None  # .ARRAY-SIZE-SEMANTICS
+        self.max_text_size: int | None = None  # .SW-MAX-TEXT-SIZE
+        self.base_type_ref: SwBaseTypeRef | str | None = None  # .BASE-TYPE-REF
+        self.fill_char: int | None = None  # .FILL-CHAR
         self._assign_optional('array_size_semantics', array_size_semantics, ar_enum.ArraySizeSemantics)
         self._assign_optional('max_text_size', max_text_size, int)
         self._assign_optional('base_type_ref', base_type_ref, SwBaseTypeRef)
@@ -2475,13 +2480,13 @@ class ImplementationDataTypeElement(Identifiable):
                  is_optional: bool | None = None,
                  **kwargs: dict) -> None:
         super().__init__(name, **kwargs)
-        self.array_size: int | None = None                                      # .ARRAY-SIZE
-        self.array_impl_policy: ar_enum.ArrayImplPolicy | None = None           # .ARRAY-IMPL-POLICY
-        self.array_size_handling: ar_enum.ArraySizeHandling | None = None       # .ARRAY-SIZE-HANDLING
-        self.array_size_semantics: ar_enum.ArraySizeSemantics | None = None     # .ARRAY-SIZE-SEMANTICS
-        self.is_optional: bool | None = None                                    # .IS-OPTIONAL
-        self.sub_elements: list["ImplementationDataTypeElement"] | None = []    # .SUB-ELEMENTS
-        self.sw_data_def_props: SwDataDefProps | None = None                    # .SW-DATA-DEF-PROPS
+        self.array_size: int | None = None  # .ARRAY-SIZE
+        self.array_impl_policy: ar_enum.ArrayImplPolicy | None = None  # .ARRAY-IMPL-POLICY
+        self.array_size_handling: ar_enum.ArraySizeHandling | None = None  # .ARRAY-SIZE-HANDLING
+        self.array_size_semantics: ar_enum.ArraySizeSemantics | None = None  # .ARRAY-SIZE-SEMANTICS
+        self.is_optional: bool | None = None  # .IS-OPTIONAL
+        self.sub_elements: list["ImplementationDataTypeElement"] | None = []  # .SUB-ELEMENTS
+        self.sw_data_def_props: SwDataDefProps | None = None  # .SW-DATA-DEF-PROPS
         self._assign_optional_positive_int("array_size", array_size)
         self._assign_optional("array_impl_policy", array_impl_policy, ar_enum.ArrayImplPolicy)
         self._assign_optional("array_size_handling", array_size_handling, ar_enum.ArraySizeHandling)
@@ -2524,11 +2529,11 @@ class ImplementationDataType(AutosarDataType):
                  type_emitter: str | None = None,
                  **kwargs: dict) -> None:
         super().__init__(name, **kwargs)
-        self.dynamic_array_size_profile: str | None = None                  # .DYNAMIC-ARRAY-SIZE-PROFILE
-        self.is_struct_with_optional_element: bool | None = None            # .IS-STRUCT-WITH-OPTIONAL-ELEMENT
-        self.sub_elements: list[ImplementationDataTypeElement] = []         # .SUB-ELEMENTS
-        self.symbol_props: SymbolProps | None = None                        # .SYMBOL-PROPS
-        self.type_emitter: str | None = None                                # .TYPE-EMITTER
+        self.dynamic_array_size_profile: str | None = None  # .DYNAMIC-ARRAY-SIZE-PROFILE
+        self.is_struct_with_optional_element: bool | None = None  # .IS-STRUCT-WITH-OPTIONAL-ELEMENT
+        self.sub_elements: list[ImplementationDataTypeElement] = []  # .SUB-ELEMENTS
+        self.symbol_props: SymbolProps | None = None  # .SYMBOL-PROPS
+        self.type_emitter: str | None = None  # .TYPE-EMITTER
         self._assign_optional('dynamic_array_size_profile', dynamic_array_size_profile, str)
         self._assign_optional('is_struct_with_optional_element', is_struct_with_optional_element, bool)
         self._assign_optional('type_emitter', type_emitter, str)
@@ -2762,10 +2767,10 @@ class ApplicationArrayElement(ApplicationCompositeElementDataPrototype):
                  index_data_type_ref: IndexDataTypeRef | None = None,
                  **kwargs: dict) -> None:
         super().__init__(name, **kwargs)
-        self.array_size_handling: ar_enum.ArraySizeHandling | None = None     # .ARRAY-SIZE-HANDLING
-        self.array_size_semantics: ar_enum.ArraySizeSemantics | None = None   # .ARRAY-SIZE-SEMANTICS
-        self.max_number_of_elements: int | None = None                        # ."MAX-NUMBER-OF-ELEMENTS
-        self.index_data_type_ref: IndexDataTypeRef | None = None              # .INDEX-DATA-TYPE-REF
+        self.array_size_handling: ar_enum.ArraySizeHandling | None = None  # .ARRAY-SIZE-HANDLING
+        self.array_size_semantics: ar_enum.ArraySizeSemantics | None = None  # .ARRAY-SIZE-SEMANTICS
+        self.max_number_of_elements: int | None = None  # ."MAX-NUMBER-OF-ELEMENTS
+        self.index_data_type_ref: IndexDataTypeRef | None = None  # .INDEX-DATA-TYPE-REF
         self._assign_optional("array_size_handling", array_size_handling, ar_enum.ArraySizeHandling)
         self._assign_optional("array_size_semantics", array_size_semantics, ar_enum.ArraySizeSemantics)
         self._assign_optional_positive_int("max_number_of_elements", max_number_of_elements)
@@ -2785,8 +2790,8 @@ class ApplicationArrayDataType(ApplicationCompositeDataType):
                  element: ApplicationArrayElement | None = None,
                  **kwargs: dict) -> None:
         super().__init__(name, **kwargs)
-        self.dynamic_array_size_profile: str | None = None                  # .DYNAMIC-ARRAY-SIZE-PROFILE
-        self.element: ApplicationArrayElement | None = None                 # .ELEMENT
+        self.dynamic_array_size_profile: str | None = None  # .DYNAMIC-ARRAY-SIZE-PROFILE
+        self.element: ApplicationArrayElement | None = None  # .ELEMENT
         self._assign_optional('dynamic_array_size_profile', dynamic_array_size_profile, str)
         self._assign_optional_strict('element', element, ApplicationArrayElement)
 
@@ -2874,8 +2879,8 @@ class DataTypeMap(ARObject):
                  appl_data_type_ref: ApplicationDataTypeRef | None = None,
                  impl_data_type_ref: ImplementationDataTypeRef | None = None,
                  ) -> None:
-        self.appl_data_type_ref = appl_data_type_ref   # .APPLICATION-DATA-TYPE-REF
-        self.impl_data_type_ref = impl_data_type_ref   # .IMPLEMENTATION-DATA-TYPE-REF
+        self.appl_data_type_ref = appl_data_type_ref  # .APPLICATION-DATA-TYPE-REF
+        self.impl_data_type_ref = impl_data_type_ref  # .IMPLEMENTATION-DATA-TYPE-REF
 
 
 class DataTypeMappingSet(ARElement):
@@ -2963,6 +2968,7 @@ class SwAddrMethod(ARElement):
         """
         ref_str = self._calc_ref_string()
         return None if ref_str is None else SwAddrMethodRef(ref_str)
+
 
 # --- Calibration data elements
 
@@ -3577,6 +3583,7 @@ class PackageCollection:
             result.append(package)
         return result[0] if len(result) == 1 else result
 
+
 # --- ModeDeclaration elements
 
 
@@ -3778,6 +3785,7 @@ class ModeDeclarationGroupPrototype(Identifiable):
         """
         ref_str = self._calc_ref_string()
         return None if ref_str is None else ModeDeclarationGroupPrototypeRef(ref_str)
+
 
 # --- Port Interface elements
 
@@ -4346,6 +4354,7 @@ class ModeSwitchInterface(PortInterface):
         self.mode_group = ModeDeclarationGroupPrototype(name, type_ref, calibration_access, **kwargs)
         return self.mode_group
 
+
 # --- System Template Elements
 
 
@@ -4407,17 +4416,17 @@ class EndToEndTransformationComSpecProps(Describable):
         self.e2e_profile_compatibility_props_ref: E2EProfileCompatibilityPropsRef | None = None
         self.max_delta_counter: int | None = None  # .MAX-DELTA-COUNTER
         self.max_error_state_init: int | None = None  # .MAX-ERROR-STATE-INIT
-        self.max_error_state_invalid: int | None = None   # .MAX-ERROR-STATE-INVALID
-        self.max_error_state_valid: int | None = None   # .MAX-ERROR-STATE-VALID
-        self.max_no_new_repeated_data: int | None = None   # .MAX-NO-NEW-OR-REPEATED-DATA
-        self.min_ok_state_init: int | None = None   # .MIN-OK-STATE-INIT
-        self.min_ok_state_invalid: int | None = None   # .MIN-OK-STATE-INVALID
-        self.min_ok_state_valid: int | None = None   # .MIN-OK-STATE-VALID
-        self.sync_counter_init: int | None = None   # .SYNC-COUNTER-INIT
-        self.window_size: int | None = None   # .WINDOW-SIZE
-        self.window_size_init: int | None = None   # .WINDOW-SIZE-INIT
-        self.window_size_invalid: int | None = None   # .WINDOW-SIZE-INVALID
-        self.window_size_valid: int | None = None   # .WINDOW-SIZE-VALID
+        self.max_error_state_invalid: int | None = None  # .MAX-ERROR-STATE-INVALID
+        self.max_error_state_valid: int | None = None  # .MAX-ERROR-STATE-VALID
+        self.max_no_new_repeated_data: int | None = None  # .MAX-NO-NEW-OR-REPEATED-DATA
+        self.min_ok_state_init: int | None = None  # .MIN-OK-STATE-INIT
+        self.min_ok_state_invalid: int | None = None  # .MIN-OK-STATE-INVALID
+        self.min_ok_state_valid: int | None = None  # .MIN-OK-STATE-VALID
+        self.sync_counter_init: int | None = None  # .SYNC-COUNTER-INIT
+        self.window_size: int | None = None  # .WINDOW-SIZE
+        self.window_size_init: int | None = None  # .WINDOW-SIZE-INIT
+        self.window_size_invalid: int | None = None  # .WINDOW-SIZE-INVALID
+        self.window_size_valid: int | None = None  # .WINDOW-SIZE-VALID
         self._assign_optional_strict("clear_from_valid_to_invalid", clear_from_valid_to_invalid, bool)
         self._assign_optional_strict("disable_e2e_check", disable_e2e_check, bool)
         self._assign_optional_strict("disable_e2e_state_machine", disable_e2e_state_machine, bool)
@@ -4701,7 +4710,7 @@ class NvProvideComSpec(ProvidePortComSpec):
         super().__init__()
         self.ram_block_init_value: ValueSpecificationElement | None = None  # .RAM-BLOCK-INIT-VALUE
         self.rom_block_init_value: ValueSpecificationElement | None = None  # .RAM-BLOCK-INIT-VALUE
-        self.variable_ref: VariableDataPrototypeRef | None = None         # .VARIABLE-REF
+        self.variable_ref: VariableDataPrototypeRef | None = None  # .VARIABLE-REF
         self._assign_optional_strict("ram_block_init_value", ram_block_init_value, ValueSpecification)
         self._assign_optional_strict("rom_block_init_value", rom_block_init_value, ValueSpecification)
         self._assign_optional("variable_ref", variable_ref, VariableDataPrototypeRef)
@@ -4725,7 +4734,7 @@ class ParameterProvideComSpec(ProvidePortComSpec):
 
 
 EndToEndTransformationComSpecPropsArgTypes = Union[EndToEndTransformationComSpecProps,
-                                                   list[EndToEndTransformationComSpecProps]]
+list[EndToEndTransformationComSpecProps]]
 
 
 class ServerComSpec(ProvidePortComSpec):
@@ -4910,13 +4919,13 @@ class ReceiverComSpec(RequirePortComSpec):
         # .EXTERNAL-REPLACEMENT-REF not supported (Status Removed)
         self.handle_out_of_range: ar_enum.HandleOutOfRange | None = None  # .HANDLE-OUT-OF-RANGE
         self.handle_out_of_range_status: ar_enum.HandleOutOfRangeStatus | None = None  # .HANDLE-OUT-OF-RANGE-STATUS
-        self.max_delta_counter_init: int | None = None   # .MAX-DELTA-COUNTER-INIT
-        self.max_no_new_repeated_data: int | None = None   # .MAX-NO-NEW-OR-REPEATED-DATA
+        self.max_delta_counter_init: int | None = None  # .MAX-DELTA-COUNTER-INIT
+        self.max_no_new_repeated_data: int | None = None  # .MAX-NO-NEW-OR-REPEATED-DATA
         self.network_representation: SwDataDefProps | None = None  # .NETWORK-REPRESENTATION
         # .RECEIVER-INTENT not supported (adaptive platform)
         self.reception_props: ReceptionComSpecProps | None = None  # .RECEPTION-PROPS
         self.replace_with: VariableAccess | None = None  # .REPLACE-WITH
-        self.sync_counter_init: int | None = None   # .SYNC-COUNTER-INIT
+        self.sync_counter_init: int | None = None  # .SYNC-COUNTER-INIT
         self.transformation_com_spec_props: list[EndToEndTransformationComSpecProps] = []
         self.uses_end_to_end_protection: bool | None = None  # .USES-END-TO-END-PROTECTION
         if data_element_ref is not None:
@@ -5819,6 +5828,7 @@ class CompositionSwComponentType(SwComponentType, Searchable):
         self.connectors.append(connector)
         return connector
 
+
 # --- SWC internal behavior elements
 
 
@@ -5829,7 +5839,7 @@ class ArVariableInImplementationDataInstanceRef(ARObject):
     """
 
     ContextDataPrototypeArgType = Union[AbstractImplementationDataTypeElementRef,
-                                        list[AbstractImplementationDataTypeElementRef]]
+    list[AbstractImplementationDataTypeElementRef]]
 
     def __init__(self,
                  port_prototype_ref: PortPrototypeRef | None = None,
@@ -5878,7 +5888,7 @@ class VariableInAtomicSWCTypeInstanceRef(ARObject):
     """
 
     ContextDataPrototypeArgType = Union[ApplicationCompositeElementDataPrototypeRef,
-                                        list[ApplicationCompositeElementDataPrototypeRef]]
+    list[ApplicationCompositeElementDataPrototypeRef]]
 
     def __init__(self,
                  port_prototype_ref: PortPrototypeRef | None = None,
@@ -6016,3 +6026,220 @@ class SwcImplementation(Implementation):
         if ref_str is None:
             return None
         return SwcImplementationRef(ref_str)
+
+
+class CommunicationElement(ARElement):
+    """
+        arxml communication element for Communication data maps
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+
+class Communication(ARElement):
+    """
+        Communication element set container
+    """
+
+    def __init__(self,
+                 name: str,
+                 sub_elements: list[CommunicationElement] | None = None,
+                 symbol_props: SymbolProps | None = None,
+                 type_emitter: str | None = None,
+                 **kwargs: dict
+                 ):
+        super().__init__(name, **kwargs)
+
+        self.sub_elements: list[CommunicationElement] = []  # .SUB-ELEMENT
+        self.symbol_props: SymbolProps | None = None  # .SYMBOL-PROPS
+        self.type_emitter = type_emitter  # .TYPE-EMITTER
+        self._assign_optional('type_emitter', type_emitter, str)
+
+        if sub_elements is not None:
+            for elem in sub_elements:
+                self.sub_elements.append(elem)
+
+        if symbol_props is not None:
+            if isinstance(symbol_props, SymbolProps):
+                self.symbol_props = symbol_props
+            else:
+                raise TypeError("'symbol_props' must be of type SymbolPrps")
+
+
+class DataTransformationElement(ARElement):
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+
+class DataTransformationSet(CommunicationElement):
+    """
+        tag: DATA-TRANSFORMATION-SET
+    """
+
+    def __init__(self,
+                 name: str,
+                 sub_elements: list[DataTransformationElement] | None = None,
+                 symbol_props: SymbolProps | None = None,
+                 type_emitter: str | None = None,
+                 **kwargs: dict
+                 ):
+        super().__init__(name, **kwargs)
+
+        self.sub_elements: list[DataTransformationElement] = []  # .SUB-ELEMENT
+        self.symbol_props: SymbolProps | None = None  # .SYMBOL-PROPS
+        self.type_emitter = type_emitter  # .TYPE-EMITTER
+        self._assign_optional('type_emitter', type_emitter, str)
+
+        if sub_elements is not None:
+            for elem in sub_elements:
+                self.sub_elements.append(elem)
+
+        if symbol_props is not None:
+            if isinstance(symbol_props, SymbolProps):
+                self.symbol_props = symbol_props
+            else:
+                raise TypeError("'symbol_props' must be of type SymbolPrps")
+
+
+class TransformerChainRef(BaseRef):
+    """
+        TRANSFORMATION-TECHNOLOGY REF
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.TRANSFORMATION_TECHNOLOGY}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict
+                 ):
+        super().__init__(name, **kwargs)
+
+
+class DataTransformations(Identifiable):
+    """
+        tag : DATA-TRANSFORMATION
+    """
+
+    def __init__(self,
+                 name: str,
+                 execute_despite_data_unavailability: bool = True,
+                 transformer_train_ref: TransformerChainRef | None = None,
+                 **kwargs: dict
+                 ):
+        super().__init__(name, **kwargs)
+        self.transformer_train_ref = None
+        self.execute_despite_data_unavailability = execute_despite_data_unavailability
+        if transformer_train_ref is not None:
+            if isinstance(transformer_train_ref, TransformerChainRef):
+                self.transformer_train_ref = transformer_train_ref
+            else:
+                raise TypeError("transformer_train_ref must be instance of TransformerChainRef")
+
+
+class DataTransformationList(DataTransformationElement):
+    """
+        tag : DATA-TRANSFORMATIONS
+    """
+
+    def __init__(self, name: str = None, **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.sub_element: list[DataTransformations] = []
+
+    def append(self, elem: DataTransformations) -> None:
+        self.sub_element.append(elem)
+
+
+class DataBufferProperties:
+    def __init__(self,
+                 header_length: int = 64,
+                 in_place: bool = False
+                 ):
+        self.header_length = header_length
+        self.in_place = in_place
+
+    @staticmethod
+    def header_length_tag() -> str:
+        return "HEADER_LENGTH"
+
+    @staticmethod
+    def in_place_tag() -> str:
+        return "IN_PLACE"
+
+
+class SomeIpDescriptionDescription:
+    def __init__(self,
+                 byte_order: str = "OPAQUE",
+                 interface_version: str = "1.0.0"
+                 ):
+        self.byte_order = byte_order
+        self.interface_version = interface_version
+
+
+class TransformationDescription:
+
+    def __init__(self,
+                 some_ip_description: SomeIpDescriptionDescription = None,
+                 ):
+        self.some_ip_description = some_ip_description
+
+
+class TransformationTechnologyElement(DataTransformationElement):
+    """
+        tag: TRANSFORMATION-TECHNOLOGY
+    """
+
+    def __init__(self,
+                 name: str,
+                 protocol: str = "SOMEIP",
+                 buffer_properties: DataBufferProperties | None = None,
+                 transformation_description: TransformationDescription | None = None,
+                 transformer_class: str = "SERIALIZER",
+                 version: str = "1.0.0",
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.protocol = protocol
+        self.buffer_properties = buffer_properties
+        self.transformation_description = transformation_description
+        self.transformer_class = transformer_class
+        self.version = version
+
+
+class TransformationTechnology(CommunicationElement):
+    """
+        tag: TRANSFORMATION-TECHNOLOGYS
+    """
+
+    def __init__(self,
+                 name: str = "",
+                 sub_elements: list[TransformationTechnologyElement] | None = None,
+                 symbol_props: SymbolProps | None = None,
+                 type_emitter: str | None = None,
+                 **kwargs: dict
+                 ):
+        super().__init__(name, **kwargs)
+        self.sub_elements: list[TransformationTechnologyElement] = []  # .SUB-ELEMENT
+        self.symbol_props: SymbolProps | None = None  # .SYMBOL-PROPS
+        self.type_emitter = type_emitter  # .TYPE-EMITTER
+        self._assign_optional('type_emitter', type_emitter, str)
+
+        if sub_elements is not None:
+            for elem in sub_elements:
+                self.sub_elements.append(elem)
+
+        if symbol_props is not None:
+            if isinstance(symbol_props, SymbolProps):
+                self.symbol_props = symbol_props
+            else:
+                raise TypeError("'symbol_props' must be of type SymbolPrps")
+
+    def append(self, elem: TransformationTechnologyElement):
+
+        assert isinstance(elem, TransformationTechnologyElement)
+        self.sub_elements.append(elem)

@@ -10,6 +10,7 @@ import decimal
 import autosar.xml.document as ar_document
 import autosar.xml.element as ar_element
 import autosar.xml.enumeration as ar_enum
+
 # import autosar.xml.exception
 
 # Type aliases
@@ -51,7 +52,7 @@ class _XMLWriter:
     def _indent(self):
         self.indentation_level += 1
         self.indentation_str = self.indentation_char * \
-            (self.indentation_level * self.indentation_step)
+                               (self.indentation_level * self.indentation_step)
 
     def _dedent(self):
         self.indentation_level -= 1
@@ -59,7 +60,7 @@ class _XMLWriter:
             self.indentation_str = ''
         else:
             self.indentation_str = self.indentation_char * \
-                (self.indentation_level * self.indentation_step)
+                                   (self.indentation_level * self.indentation_step)
 
     def _add_line(self, text):
         if self.line_number > 1:
@@ -221,6 +222,8 @@ class Writer(_XMLWriter):
             'ApplicationSoftwareComponentType': self._write_application_software_component_type,
             'CompositionSwComponentType': self._write_composition_sw_component_type,
             'SwcImplementation': self._write_swc_implementation,
+            'DataTransformationSet': self._write_data_transformation_set,
+            'TransformationTechnology': self._write_transformation_technology,
         }
         # Value specification elements
         self.switcher_value_specification = {
@@ -1892,7 +1895,7 @@ class Writer(_XMLWriter):
         if elem.server_arg_impl_policy is not None:
             self._add_content("SERVER-ARGUMENT-IMPL-POLICY", ar_enum.enum_to_xml(elem.server_arg_impl_policy))
 
-# --- Reference Elements
+    # --- Reference Elements
 
     def _collect_base_ref_attr(self,
                                elem: ar_element.BaseRef,
@@ -1968,6 +1971,13 @@ class Writer(_XMLWriter):
         attr: TupleList = []
         self._collect_base_ref_attr(elem, attr)
         self._add_content('BASE-TYPE-REF', elem.value, attr)
+
+    def _write_transformer_chain_ref(self, elem: ar_element.TransformerChainRef) -> None:
+
+        assert isinstance(elem, ar_element.TransformerChainRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content('TRANSFORMER-CHAIN-REF', elem.value, attr)
 
     def _write_sw_addr_method_ref(self, elem: ar_element.SwAddrMethodRef) -> None:
         """
@@ -2241,7 +2251,7 @@ class Writer(_XMLWriter):
         self._collect_base_ref_attr(elem, attr)
         self._add_content(tag, elem.value, attr)
 
-# -- Constant and value specifications
+    # -- Constant and value specifications
 
     def _write_text_value_specification(self, elem: ar_element.TextValueSpecification) -> None:
         """
@@ -2433,7 +2443,7 @@ class Writer(_XMLWriter):
                 self._write_constant_ref(elem.constant_ref, "CONSTANT-REF")
             self._leave_child()
 
-# --- CalibrationData elements
+    # --- CalibrationData elements
 
     def _write_sw_values(self, elem: ar_element.SwValues) -> None:
         """
@@ -3622,6 +3632,113 @@ class Writer(_XMLWriter):
         self._write_identifiable(elem)
         self._write_implementtion(elem)
         self._write_swc_implementation_group(elem)
+        self._leave_child()
+
+    def _write_data_transformation_info(self, elem: ar_element.DataTransformations) -> None:
+
+        """
+        write tag : DATA-TRANSFORMATION
+        """
+        assert isinstance(elem, ar_element.DataTransformations)
+        self._add_child("DATA-TRANSFORMATION")
+        self._write_referrable(elem)
+        self._add_content('EXECUTE-DESPITE-DATA-UNAVAILABILITY', str(elem.execute_despite_data_unavailability).lower())
+        if elem.transformer_train_ref is not None:
+            self._write_transformer_chain_ref(elem.transformer_train_ref)
+        self._leave_child()
+
+    def _write_data_transformation_list(self, elem: ar_element.DataTransformationList) -> None:
+
+        """
+        write Tag: DATA-TRANSFORMATIONS
+        """
+        assert isinstance(elem, ar_element.DataTransformationList)
+        self._add_child("DATA-TRANSFORMATIONS")
+        for sub_elem in elem.sub_element:
+            self._write_data_transformation_info(sub_elem)
+        self._leave_child()
+
+    def _write_data_buffer_properties(self, elem: ar_element.DataBufferProperties) -> None:
+
+        """
+            tag: BUFFER-PROPERTIES
+        """
+        assert isinstance(elem, ar_element.DataBufferProperties)
+        self._add_child("BUFFER-PROPERTIES")
+        self._add_content(ar_element.DataBufferProperties.header_length_tag(), str(elem.header_length))
+        self._add_content(ar_element.DataBufferProperties.in_place_tag(), str(elem.in_place).lower())
+        self._leave_child()
+
+    def _write_someip_transformation_description(self, elem: ar_element.SomeIpDescriptionDescription):
+
+        """
+            tag: TRANSFORMATION-DESCRIPTION
+        """
+
+        assert isinstance(elem, ar_element.SomeIpDescriptionDescription)
+        self._add_child("SOMEIP-TRANSFORMATION-DESCRIPTION")
+        self._add_content("BYTE-ORDER", elem.byte_order)
+        self._add_content("INTERFACE-VERSION", elem.interface_version)
+        self._leave_child()
+
+    def _write_transformation_description(self, elem: ar_element.TransformationDescription):
+
+        """
+            tag: SOMEIP-TRANSFORMATION-DESCRIPTION
+        """
+
+        assert isinstance(elem, ar_element.TransformationDescription)
+        self._add_child("TRANSFORMATION-DESCRIPTIONS")
+        self._write_someip_transformation_description(elem.some_ip_description)
+        self._leave_child()
+
+    def _write_transformer_technology_element(self, elem: ar_element.TransformationTechnologyElement) -> None:
+
+        """
+            tag: TRANSFORMATION-TECHNOLOGY
+        """
+
+        assert isinstance(elem, ar_element.TransformationTechnologyElement)
+        self._add_child("TRANSFORMATION-TECHNOLOGY")
+        self._write_referrable(elem)
+        self._add_content("PROTOCOL", elem.protocol)
+        self._write_data_buffer_properties(elem.buffer_properties)
+        self._write_transformation_description(elem.transformation_description)
+        self._add_content("TRANSFORMER-CLASS", elem.transformer_class)
+        self._add_content("VERSION", elem.version)
+        self._leave_child()
+
+    def _write_transformation_technology(self, elem: ar_element.TransformationTechnology) -> None:
+
+        """
+            tag: TRANSFORMATION-TECHNOLOGYS
+        """
+
+        assert isinstance(elem, ar_element.TransformationTechnology)
+        self._add_child("TRANSFORMATION-TECHNOLOGYS")
+        for sub_elem in elem.sub_elements:
+            self._write_transformer_technology_element(sub_elem)
+
+        self._leave_child()
+
+    def _write_data_transformation_set(self, elem: ar_element.DataTransformationSet) -> None:
+
+        """
+        write Tags: DATA-TRANSFORMATION-SET
+        """
+        assert isinstance(elem, ar_element.DataTransformationSet)
+        self._add_child("DATA-TRANSFORMATION-SET")
+        self._write_referrable(elem)
+
+        for sub_elem in elem.sub_elements:
+            if isinstance(sub_elem, ar_element.DataTransformationList):
+                self._write_data_transformation_list(sub_elem)
+            elif isinstance(sub_elem, ar_element.TransformationTechnology):
+                self._write_transformation_technology(sub_elem)
+            else:
+                raise TypeError(
+                    "sub element of DataTransformationSet must be type of DataTransformationTechnologyElement or DataTransformationList")
+
         self._leave_child()
 
     def _write_swc_implementation_group(self, elem: ar_element.SwcImplementation) -> None:
