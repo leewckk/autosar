@@ -353,6 +353,9 @@ class Identifiable(MultiLanguageReferrable):
             return None
         ref_parts: list[str] = [self.name]
         self.parent.update_ref_parts(ref_parts)
+
+        # delete no name container
+        ref_parts = [part for part in ref_parts if part.strip()]
         return '/'.join(reversed(ref_parts))
 
 
@@ -6066,7 +6069,12 @@ class Communication(ARElement):
             if isinstance(symbol_props, SymbolProps):
                 self.symbol_props = symbol_props
             else:
-                raise TypeError("'symbol_props' must be of type SymbolPrps")
+                raise TypeError('\'symbol_props\' must be of type SymbolPrps')
+
+    def add_element(self, elem: CommunicationElement):
+        assert isinstance(elem, CommunicationElement)
+        elem.parent = self
+        self.sub_elements.append(elem)
 
 
 class DataTransformationElement(ARElement):
@@ -6106,8 +6114,14 @@ class DataTransformationSet(CommunicationElement):
             else:
                 raise TypeError("'symbol_props' must be of type SymbolPrps")
 
+    def add_element(self, elem: DataTransformationElement):
 
-class TransformerChainRef(BaseRef):
+        assert isinstance(elem, DataTransformationElement)
+        elem.parent = self
+        self.sub_elements.append(elem)
+
+
+class TransformerTechnologyElementRef(BaseRef):
     """
         TRANSFORMATION-TECHNOLOGY REF
     """
@@ -6119,7 +6133,7 @@ class TransformerChainRef(BaseRef):
                  name: str,
                  **kwargs: dict
                  ):
-        super().__init__(name, **kwargs)
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.TRANSFORMATION_TECHNOLOGY)
 
 
 class DataTransformations(Identifiable):
@@ -6130,14 +6144,14 @@ class DataTransformations(Identifiable):
     def __init__(self,
                  name: str,
                  execute_despite_data_unavailability: bool = True,
-                 transformer_train_ref: TransformerChainRef | None = None,
+                 transformer_train_ref: TransformerTechnologyElementRef | None = None,
                  **kwargs: dict
                  ):
         super().__init__(name, **kwargs)
         self.transformer_train_ref = None
         self.execute_despite_data_unavailability = execute_despite_data_unavailability
         if transformer_train_ref is not None:
-            if isinstance(transformer_train_ref, TransformerChainRef):
+            if isinstance(transformer_train_ref, TransformerTechnologyElementRef):
                 self.transformer_train_ref = transformer_train_ref
             else:
                 raise TypeError("transformer_train_ref must be instance of TransformerChainRef")
@@ -6152,7 +6166,9 @@ class DataTransformationList(DataTransformationElement):
         super().__init__(name, **kwargs)
         self.sub_element: list[DataTransformations] = []
 
-    def append(self, elem: DataTransformations) -> None:
+    def add_element(self, elem: DataTransformations) -> None:
+        assert isinstance(elem, DataTransformations)
+        elem.parent = self
         self.sub_element.append(elem)
 
 
@@ -6166,11 +6182,11 @@ class DataBufferProperties:
 
     @staticmethod
     def header_length_tag() -> str:
-        return "HEADER_LENGTH"
+        return "HEADER-LENGTH"
 
     @staticmethod
     def in_place_tag() -> str:
-        return "IN_PLACE"
+        return "IN-PLACE"
 
 
 class SomeIpDescriptionDescription:
@@ -6210,8 +6226,16 @@ class TransformationTechnologyElement(DataTransformationElement):
         self.transformer_class = transformer_class
         self.version = version
 
+    def ref(self) -> TransformerTechnologyElementRef | None:
+        """
+        Returns a reference to this element or
+        None if the element is not yet part of a package
+        """
+        ref_str = self._calc_ref_string()
+        return None if ref_str is None else TransformerTechnologyElementRef(ref_str)
 
-class TransformationTechnology(CommunicationElement):
+
+class TransformationTechnology(DataTransformationElement):
     """
         tag: TRANSFORMATION-TECHNOLOGYS
     """
@@ -6239,7 +6263,62 @@ class TransformationTechnology(CommunicationElement):
             else:
                 raise TypeError("'symbol_props' must be of type SymbolPrps")
 
-    def append(self, elem: TransformationTechnologyElement):
+    def add_element(self, elem: TransformationTechnologyElement):
 
         assert isinstance(elem, TransformationTechnologyElement)
+        elem.parent = self
         self.sub_elements.append(elem)
+
+    def find(self, name: str) -> TransformationTechnologyElement | None:
+
+        for elem in self.sub_elements:
+            if name == elem.name:
+                return elem
+        return None
+
+
+"""
+    SOME/IP Topology element definitions
+"""
+
+
+class EthernetClusterVariantElement(ARElement):
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+
+class EthernetPhysicalChannel(ARElement):
+    """
+        tag: ETHERNET-PHYSICAL-CHANNEL
+        sub element:
+            CATEGORY
+            COMM-CONNECTORS
+            I-SIGNAL-TRIGGERING
+            PUD-TRIGGERING
+            NETWORK-ENDPOINTS
+            SO-AD-CONFIG
+
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+
+class EthernetClusterConditional(EthernetClusterVariantElement):
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+
+class TopologyClusterElement(ARElement):
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)

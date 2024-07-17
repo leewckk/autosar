@@ -1101,6 +1101,7 @@ enum_to_xml_map: dict[str, list] = {
         "SWC-INTERNAL-BEHAVIOR",                         # 47
         "UNIT",                                          # 48
         "VARIABLE-DATA-PROTOTYPE",                       # 49
+        "TRANSFORMATION-TECHNOLOGY",                     # 50
     ],
     "IntervalType": [
         "CLOSED",  # 0

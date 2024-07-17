@@ -1972,9 +1972,9 @@ class Writer(_XMLWriter):
         self._collect_base_ref_attr(elem, attr)
         self._add_content('BASE-TYPE-REF', elem.value, attr)
 
-    def _write_transformer_chain_ref(self, elem: ar_element.TransformerChainRef) -> None:
+    def _write_transformer_chain_ref(self, elem: ar_element.TransformerTechnologyElementRef) -> None:
 
-        assert isinstance(elem, ar_element.TransformerChainRef)
+        assert isinstance(elem, ar_element.TransformerTechnologyElementRef)
         attr: TupleList = []
         self._collect_base_ref_attr(elem, attr)
         self._add_content('TRANSFORMER-CHAIN-REF', elem.value, attr)
