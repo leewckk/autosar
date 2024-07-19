@@ -224,6 +224,7 @@ class Writer(_XMLWriter):
             'SwcImplementation': self._write_swc_implementation,
             'DataTransformationSet': self._write_data_transformation_set,
             'TransformationTechnology': self._write_transformation_technology,
+            'TopologyClusterElement': self._write_topology_cluster_element,
         }
         # Value specification elements
         self.switcher_value_specification = {
@@ -3719,6 +3720,403 @@ class Writer(_XMLWriter):
         for sub_elem in elem.sub_elements:
             self._write_transformer_technology_element(sub_elem)
 
+        self._leave_child()
+
+    def _write_communication_connectors_ref(self, elem: ar_element.EthernetCommunicationConnectorRef) -> None:
+        """
+        tag : COMMUNICATION-CONNECTOR-REF
+        dest : ETHERNET-COMMUNICATION-CONNECTOR
+        """
+        assert isinstance(elem, ar_element.EthernetCommunicationConnectorRef)
+        self._add_child("COMMUNICATION-CONNECTOR-REF-CONDITIONAL")
+
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content("COMMUNICATION-CONNECTOR-REF", elem.value, attr)
+        self._leave_child()
+
+    def _write_i_signal_port_refs(self, elem: ar_element.ISignalPortRef) -> None:
+        """
+        tag : I-SIGNAL-PORT-REF
+        dest : I-SIGNAL-PORT
+        """
+        assert isinstance(elem, ar_element.ISignalPortRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content("I-SIGNAL-PORT-REF", elem.value, attr)
+
+    def _write_i_signal_ref(self, elem: ar_element.ISignalRef) -> None:
+        """
+        tag : I-SIGNAL-REF
+        dest : I-SIGNAL
+        """
+        assert isinstance(elem, ar_element.ISignalRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content("I-SIGNAL-REF", elem.value, attr)
+
+    def _write_i_signal_triggering(self, elem: ar_element.ISignalTriggeringElement):
+        """
+        tag: I-SIGNAL-TRIGGERING
+        """
+        assert isinstance(elem, ar_element.ISignalTriggeringElement)
+        self._add_child("I-SIGNAL-TRIGGERING")
+        self._write_referrable(elem)
+
+        self._add_child("I-SIGNAL-PORT-REFS")
+        for ref in elem.i_signal_port_refs:
+            self._write_i_signal_port_refs(ref)
+        self._leave_child()
+
+        self._write_i_signal_ref(elem.i_signal_ref)
+        self._leave_child()
+
+    def _write_i_pdu_port_ref(self, elem: ar_element.IPduPortRef) -> None:
+        """
+          tag : I-PDU-PORT-REF
+          dest: I-PDU-PORT
+        """
+        assert isinstance(elem, ar_element.IPduPortRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content("I-PDU-PORT-REF", elem.value, attr)
+
+    def _write_general_purpose_pdu_ref(self, elem: ar_element.GeneralPurposePduRef) -> None:
+        """
+        tag : I-PDU-REF
+        dest: GENERAL-PURPOSE-PDU
+        """
+        assert isinstance(elem, ar_element.GeneralPurposePduRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content("I-PDU-REF", elem.value, attr)
+
+    def _write_pdu_triggering(self, elem: ar_element.PduTriggering) -> None:
+        """
+        tag : PDU-TRIGGERING
+        parent: PDU-TRIGGERINGS
+        sub :
+            SHORT-NAME
+            I-PDU-PORT-REFS
+                I-PDU-PORT-REF
+            I-PDU-REF
+        """
+        assert isinstance(elem, ar_element.PduTriggering)
+        self._add_child("PDU-TRIGGERING")
+        self._write_referrable(elem)
+
+        self._add_child("I-PDU-PORT-REFS")
+        for child in elem.i_pdu_port_refs:
+            self._write_i_pdu_port_ref(child)
+        self._leave_child()
+
+        self._write_general_purpose_pdu_ref(elem.general_purpose_ref)
+        self._leave_child()
+
+    def _write_ipv_4_configuration(self, elem: ar_element.IPV4Configuration) -> None:
+        """
+            tag : IPV-4-CONFIGURATION
+            parent : NETWORK-ENDPOINT-ADDRESS
+            sub:
+                DEFAULT-GATEWAY
+                IPV-4-ADDRESS
+                IPV-4-ADDRESS-SOURCE
+                NETWORK-MASK
+        """
+        assert isinstance(elem, ar_element.IPV4Configuration)
+        self._add_child("IPV-4-CONFIGURATION")
+        self._add_content("DEFAULT-GATEWAY", elem.default_gateway)
+        self._add_content("IPV-4-ADDRESS", elem.ipv4_address)
+        self._add_content("IPV-4-ADDRESS-SOURCE", elem.ipv4_address_source)
+        self._add_content("NETWORK-MASK", elem.network_mask)
+        self._leave_child()
+
+    def _write_network_endpoint_address(self, elem: ar_element.NetworkEndpointAddress) -> None:
+        """
+        tag : NETWORK-ENDPOINT-ADDRESS
+        parent : NETWORK-ENDPOINTS
+        sub:
+            IPV-4-CONFIGURATION
+        """
+        assert isinstance(elem, ar_element.NetworkEndpointAddress)
+        self._add_child("NETWORK-ENDPOINT-ADDRESSES")
+        self._write_ipv_4_configuration(elem.ipv4_configuration)
+        self._leave_child()
+
+    def _write_network_endpoint(self, elem: ar_element.NetworkEndPoint) -> None:
+        """
+        tag : NETWORK-ENDPOINT
+        sub :
+            SHORT-NAME
+            NETWORK-ENDPOINT-ADDRESS
+        """
+        assert isinstance(elem, ar_element.NetworkEndPoint)
+        self._add_child("NETWORK-ENDPOINT")
+        self._write_referrable(elem)
+        for addr in elem.network_endpoint_address_list:
+            self._write_network_endpoint_address(addr)
+        self._leave_child()
+
+    def _write_socket_address_ref(self, elem: ar_element.SocketAddressRef, tag: str) -> None:
+        """
+        tag : SOCKET-ADDRESS-REF
+        dest : SOCKET-ADDRESS
+        """
+        assert isinstance(elem, ar_element.SocketAddressRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content(tag, elem.value, attr)
+
+    def _write_pdu_triggering_ref(self, elem: ar_element.PDUTriggeringRef, tag: str) -> None:
+        """
+        tag : PDU-TRIGGERING-REF
+        dest : PDU-TRIGGERING
+        """
+        assert isinstance(elem, ar_element.PDUTriggeringRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content(tag, elem.value, attr)
+
+    def _write_socket_connection_pdu_identifier(self, elem: ar_element.SocketConnectionIPduIdentifier) -> None:
+        """
+        tag : SOCKET-CONNECTION-IPDU-IDENTIFIER
+        sub:
+            HEADER-ID
+            PDU-TRIGGERING-REF
+        """
+        assert isinstance(elem, ar_element.SocketConnectionIPduIdentifier)
+        self._add_child("SOCKET-CONNECTION-IPDU-IDENTIFIER")
+        self._add_content("HEADER-ID", str(elem.header_identifier))
+        self._write_pdu_triggering_ref(elem.pdu_triggering_ref, "PDU-TRIGGERING-REF")
+        self._leave_child()
+
+    def _write_socket_connection(self, elem: ar_element.SocketConnection) -> None:
+        """
+           tag: SOCKET-CONNECTION
+           parent: SOCKET-CONNECTIONS->SOCKET-CONNECTION-BUNDLE
+           sub:
+               CLIENT-PORT-REF
+               PDUS
+                   SOCKET-CONNECTION-IPDU-IDENTIFIER
+           """
+        assert isinstance(elem, ar_element.SocketConnection)
+        self._add_child("SOCKET-CONNECTION")
+        self._write_socket_address_ref(elem.client_port_ref, "CLIENT-PORT-REF")
+
+        self._add_child("PDUS")
+        for sub in elem.pdus:
+            self._write_socket_connection_pdu_identifier(sub)
+        self._leave_child()
+
+        self._leave_child()
+
+    def _write_socket_connection_bundle(self, elem: ar_element.SocketConnectionBundle) -> None:
+        """
+        tag : SOCKET-CONNECTION-BUNDLE
+        sub:
+            SHORT-NAME
+            BUNDLED-CONNECTIONS
+                SOCKET-CONNECTION
+            SERVER-PORT-REF
+        """
+        assert isinstance(elem, ar_element.SocketConnectionBundle)
+        self._add_child("SOCKET-CONNECTION-BUNDLE")
+        self._write_referrable(elem)
+
+        self._add_child("BUNDLED-CONNECTIONS")
+        for sub in elem.bundled_connections:
+            self._write_socket_connection(sub)
+        self._leave_child()
+
+        self._write_socket_address_ref(elem.server_port_ref, "SERVER-PORT-REF")
+        self._leave_child()
+
+    def _write_network_endpoint_ref(self, elem: ar_element.NetworkEndpointRef, tag: str) -> None:
+        """
+        tag : NETWORK-ENDPOINT-REF
+        dest : NETWORK-ENDPOINT
+        """
+        assert isinstance(elem, ar_element.NetworkEndpointRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content(tag, elem.value, attr)
+
+    def _write_udp_tp(self, elem: ar_element.UdpTP) -> None:
+        """
+        tag: UDP-TP
+        parent: TP-CONFIGURATION
+        sub:
+            UDP-TP-PORT
+                PORT-NUMBER
+        """
+        assert isinstance(elem, ar_element.UdpTP)
+        self._add_child("UDP-TP")
+
+        self._add_child("UDP-TP-PORT")
+        self._add_content("PORT-NUMBER", str(elem.udp_tp_port_number))
+        self._leave_child()
+
+        self._leave_child()
+
+    def _write_application_endpoint(self, elem: ar_element.ApplicationEndpoint) -> None:
+        """
+        tag : APPLICATION-ENDPOINT
+        parent: SOCKET-ADDRESS
+        sub :
+            SHORT-NAME
+            NETWORK-ENDPOINT-REF
+            TP-CONFIGURATION
+        """
+        assert isinstance(elem, ar_element.ApplicationEndpoint)
+        self._add_child("APPLICATION-ENDPOINT")
+        self._write_referrable(elem)
+        self._write_network_endpoint_ref(elem.network_endpoint_ref, "NETWORK-ENDPOINT-REF")
+
+        self._add_child("TP-CONFIGURATION")
+        self._write_udp_tp(elem.udp_tp)
+        self._leave_child()
+
+        self._leave_child()
+
+    def _write_socket_address(self, elem: ar_element.SocketAddress) -> None:
+        """
+        tag : SOCKET-ADDRESS
+        parent: SOCKET-ADDRESSS
+        sub :
+            SHORT-NAME
+            APPLICATION-ENDPOINT
+        """
+        assert isinstance(elem, ar_element.SocketAddress)
+        self._add_child("SOCKET-ADDRESS")
+        self._write_referrable(elem)
+        self._write_application_endpoint(elem.applications_endpoint)
+        self._leave_child()
+
+    def _write_so_ad_config(self, elem: ar_element.SoAdConfig) -> None:
+        """
+        tag : SO-AD-CONFIG
+        parent: ETHERNET-PHYSICAL-CHANNEL
+        sub:
+            CONNECTION-BUNDLES
+            SOCKET-ADDRESS
+        """
+        assert isinstance(elem, ar_element.SoAdConfig)
+        self._add_child("SO-AD-CONFIG")
+
+        self._add_child("CONNECTION-BUNDLES")
+        for sub in elem.connection_bundles:
+            self._write_socket_connection_bundle(sub)
+        self._leave_child()
+
+        self._add_child("SOCKET-ADDRESSS")
+        for sub in elem.socket_addresss:
+            self._write_socket_address(sub)
+        self._leave_child()
+
+        self._leave_child()
+
+    def _write_physical_channels(self, elem: ar_element.EthernetPhysicalChannel) -> None:
+        """
+            tag: ETHERNET-PHYSICAL-CHANNEL
+            sub element:
+                CATEGORY
+                COMM-CONNECTORS
+                I-SIGNAL-TRIGGERING
+                PUD-TRIGGERING
+                NETWORK-ENDPOINTS
+                SO-AD-CONFIG
+        """
+        self._add_child("ETHERNET-PHYSICAL-CHANNEL")
+        self._write_referrable(elem)
+        self._write_identifiable(elem)
+
+        self._add_child("COMM-CONNECTORS")
+        for ref in elem.comm_connectors_refs:
+            self._write_communication_connectors_ref(ref)
+        self._leave_child()
+
+        self._add_child("I-SIGNAL-TRIGGERINGS")
+        for trigger in elem.i_signal_triggerings:
+            self._write_i_signal_triggering(trigger)
+        self._leave_child()
+
+        self._add_child("PDU_TRIGGERINGS")
+        for trigger in elem.pdu_triggerings:
+            self._write_pdu_triggering(trigger)
+        self._leave_child()
+
+        self._add_child("NETWORK-ENDPOINTS")
+        for endpoint in elem.network_endpoints:
+            self._write_network_endpoint(endpoint)
+        self._leave_child()
+
+        self._write_so_ad_config(elem.so_ad_config)
+
+        self._leave_child()
+
+    def _write_coupling_port_ref(self, elem: ar_element.CouplingPortRef, tag: str) -> None:
+        """
+        tag : COUPLING-PORT-REF
+        dest : COUPLING-PORT
+        """
+        assert isinstance(elem, ar_element.CouplingPortRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content(tag, elem.value, attr)
+
+    def _write_coupling_port_connection(self, elem: ar_element.CouplingPortConnection) -> None:
+        """
+        tag : COUPLING-PORT-CONNECTION
+        parent: COUPLING-PORT-CONNECTIONS -> ETHERNET-CLUSTER-CONDITIONAL
+        sub:
+            FIRST-PORT-REF
+            SECOND-PORT-REF
+        """
+        assert isinstance(elem, ar_element.CouplingPortConnection)
+        self._add_child("COUPLING-PORT-CONNECTION")
+        self._write_coupling_port_ref(elem.first_port_ref, "FIRST-PORT-REF")
+        self._write_coupling_port_ref(elem.second_port_ref, "SECOND-PORT-REF")
+        self._leave_child()
+
+
+    def _write_ethernet_cluster_conditional(self, elem: ar_element.EthernetClusterConditional) -> None:
+        """
+        tag : ETHERNET-CLUSTER-CONDITIONAL
+        sub:
+            PHYSICAL-CHANNELS
+                ETHERNET-PHYSICAL-CHANNEL
+            COUPLING-PORT-CONNECTIONS
+                COUPLING-PORT-CONNECTION
+        """
+        assert isinstance(elem, ar_element.EthernetClusterConditional)
+        self._add_child("ETHERNET-CLUSTER-CONDITIONAL")
+
+        self._add_child("PHYSICAL-CHANNELS")
+        for channel in elem.physical_channels:
+            self._write_physical_channels(channel)
+        self._leave_child()
+
+        self._add_child("COUPLING-PORT-CONNECTIONS")
+        for connection in elem.coupling_port_connections:
+            self._write_coupling_port_connection(connection)
+        self._leave_child()
+
+        self._leave_child()
+
+    def _write_topology_cluster_element(self, elem: ar_element.TopologyClusterElement) -> None:
+        """
+            tag : ETHERNET-CLUSTER
+            sub :
+                ETHERNET-CLUSTER-CONDITIONAL
+            parent: ELEMENTS
+        """
+        assert isinstance(elem, ar_element.TopologyClusterElement)
+        self._add_child("ETHERNET-CLUSTER")
+        self._write_referrable(elem)
+        self._add_child("ETHERNET-CLUSTER-VARIANTS")
+        for sub_elem in elem.sub_element:
+            self._write_ethernet_cluster_conditional(sub_elem)
+        self._leave_child()
         self._leave_child()
 
     def _write_data_transformation_set(self, elem: ar_element.DataTransformationSet) -> None:

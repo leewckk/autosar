@@ -242,7 +242,17 @@ class IdentifiableSubTypes(Enum):
     UNIT = 48
     VARIABLE_DATA_PROTOTYPE = 49
     TRANSFORMATION_TECHNOLOGY = 50
-
+    ETHERNET_COMMUNICATION_CONNECTOR = 51
+    I_SIGNAL_PORT = 52
+    I_SIGNAL = 53
+    SOCKET_ADDRESS = 54
+    PDU_TRIGGERING = 55
+    NETWORK_ENDPOINT = 56
+    COUPLING_PORT = 57
+    ETHERNET_PHYSICAL_CHANNEL = 58
+    ETHERNET_COMMUNICATION_CONTROLLER = 59
+    I_PDU_PORT = 60
+    GENERAL_PURPOSE_PDU = 61
 
 class IntervalType(Enum):
     """
@@ -744,6 +754,17 @@ xml_to_enum_map: dict[str, dict] = {
         "UNIT": IdentifiableSubTypes.UNIT,
         "VARIABLE-DATA-PROTOTYPE": IdentifiableSubTypes.VARIABLE_DATA_PROTOTYPE,
         "TRANSFORMATION-TECHNOLOGY": IdentifiableSubTypes.TRANSFORMATION_TECHNOLOGY,
+        "ETHERNET-COMMUNICATION-CONNECTOR": IdentifiableSubTypes.ETHERNET_COMMUNICATION_CONNECTOR,
+        "I-SIGNAL-PORT": IdentifiableSubTypes.I_SIGNAL_PORT,
+        "I-SIGNAL": IdentifiableSubTypes.I_SIGNAL,
+        "SOCKET-ADDRESS": IdentifiableSubTypes.SOCKET_ADDRESS,
+        "PUD-TRIGGERING": IdentifiableSubTypes.PDU_TRIGGERING,
+        "NETWORK-ENDPOINT": IdentifiableSubTypes.NETWORK_ENDPOINT,
+        "COUPLING-PORT": IdentifiableSubTypes.COUPLING_PORT,
+        "ETHERNET-PHYSICAL-CHANNEL": IdentifiableSubTypes.ETHERNET_PHYSICAL_CHANNEL,
+        "ETHERNET-COMMUNICATION-CONTROLLER": IdentifiableSubTypes.ETHERNET_COMMUNICATION_CONTROLLER,
+        "I-PDU-PORT": IdentifiableSubTypes.I_PDU_PORT,
+        "GENERAL-PURPOSE-PDU": IdentifiableSubTypes.GENERAL_PURPOSE_PDU,
     },
     "IntervalType": {
         "CLOSED": IntervalType.CLOSED,
@@ -1102,6 +1123,17 @@ enum_to_xml_map: dict[str, list] = {
         "UNIT",                                          # 48
         "VARIABLE-DATA-PROTOTYPE",                       # 49
         "TRANSFORMATION-TECHNOLOGY",                     # 50
+        "ETHERNET-COMMUNICATION-CONNECTOR",              # 51
+        "I-SIGNAL-PORT",                                 # 52
+        "I-SIGNAL",                                      # 53
+        "SOCKET-ADDRESS",                                # 54
+        "PDU-TRIGGERING",                                # 55
+        "NETWORK-ENDPOINT",                              # 56
+        "COUPLING-PORT",                                 # 57
+        "ETHERNET-PHYSICAL-CHANNEL",                     # 58
+        "ETHERNET-COMMUNICATION-CONTROLLER",             # 59
+        "I-PDU-PORT",                                    # 60
+        "GENERAL-PURPOSE-PDU",                           # 61
     ],
     "IntervalType": [
         "CLOSED",  # 0

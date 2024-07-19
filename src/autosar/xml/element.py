@@ -6282,12 +6282,480 @@ class TransformationTechnology(DataTransformationElement):
 """
 
 
-class EthernetClusterVariantElement(ARElement):
+class EthernetCommunicationConnectorRef(BaseRef):
+    """
+    tag : COMMUNICATION-CONNECTOR-REF
+    dest : ETHERNET-COMMUNICATION-CONNECTOR
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.ETHERNET_COMMUNICATION_CONNECTOR}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.ETHERNET_COMMUNICATION_CONNECTOR)
+
+
+class ISignalPortRef(BaseRef):
+    """
+    tag : I-SIGNAL-PORT-REF
+    dest : I-SIGNAL-PORT
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.I_SIGNAL_PORT}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.I_SIGNAL_PORT)
+
+
+class ISignalRef(BaseRef):
+    """
+    tag : I-SIGNAL-REF
+    dest : I-SIGNAL
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.I_SIGNAL}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.I_SIGNAL)
+
+
+class SocketAddressRef(BaseRef):
+    """
+    tag : SOCKET-ADDRESS-REF
+    dest : SOCKET-ADDRESS
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.SOCKET_ADDRESS}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.SOCKET_ADDRESS)
+
+
+class PDUTriggeringRef(BaseRef):
+    """
+    tag : PDU-TRIGGERING-REF
+    dest : PDU-TRIGGERING
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.PDU_TRIGGERING}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.PDU_TRIGGERING)
+
+
+class NetworkEndpointRef(BaseRef):
+    """
+    tag : NETWORK-ENDPOINT-REF
+    dest : NETWORK-ENDPOINT
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.NETWORK_ENDPOINT}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.NETWORK_ENDPOINT)
+
+
+class CouplingPortRef(BaseRef):
+    """
+    tag : COUPLING-PORT-REF
+    dest : COUPLING-PORT
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.COUPLING_PORT}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.COUPLING_PORT)
+
+
+class EthernetPhysicalChannelRef(BaseRef):
+    """
+    tag : ETHERNET-PHYSICAL-CHANNEL-REF
+    dest : ETHERNET-PHYSICAL-CHANNEL
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.ETHERNET_PHYSICAL_CHANNEL}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.ETHERNET_PHYSICAL_CHANNEL)
+
+
+class EthernetCommunicationControllerRef(BaseRef):
+    """
+    tag : ETHERNET-COMMUNICATION-CONTROLLER-REF
+    dest : ETHERNET-COMMUNICATION-CONTROLLER
+    """
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.ETHERNET_COMMUNICATION_CONTROLLER}
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.ETHERNET_COMMUNICATION_CONTROLLER)
+
+
+class IPduPortRef(BaseRef):
+    """
+    tag : I-PDU-PORT-REF
+    dest: I-PDU-PORT
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.I_PDU_PORT)
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.I_PDU_PORT}
+
+
+class GeneralPurposePduRef(BaseRef):
+    """
+    tag : I-PDU-REF
+    dest: GENERAL-PURPOSE-PDU
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.GENERAL_PURPOSE_PDU)
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.GENERAL_PURPOSE_PDU}
+
+
+class ISignalTriggeringElement(ARElement):
+    """
+    tag: I-SIGNAL-TRIGGERING
+    """
+
+    def __init__(self,
+                 name: str,
+                 i_signal_ref: ISignalRef = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.i_signal_port_refs: list[ISignalPortRef] = []
+
+        if isinstance(i_signal_ref, ISignalRef):
+            self.i_signal_ref: ISignalRef = i_signal_ref
+        else:
+            raise TypeError("i_signal_ref must be a instance of ISignalRef")
+
+    def add_element(self, elem: ISignalPortRef | ISignalRef) -> None:
+
+        if isinstance(elem, ISignalPortRef):
+            self.i_signal_port_refs.append(elem)
+        elif isinstance(elem, ISignalRef):
+            self.i_signal_ref = elem
+        else:
+            raise TypeError("add_element must be a instance of ISignalPortRef or ISignalRef")
+
+
+class PduTriggering(ARElement):
+    """
+    tag : PDU-TRIGGERING
+    parent: PDU-TRIGGERINGS
+    sub :
+        SHORT-NAME
+        I-PDU-PORT-REFS
+            I-PDU-PORT-REF
+        I-PDU-REF
+    """
+
+    def __init__(self,
+                 name: str,
+                 general_purpose_ref: GeneralPurposePduRef | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.i_pdu_port_refs: list[IPduPortRef] = []
+
+        if general_purpose_ref is not None and isinstance(general_purpose_ref, GeneralPurposePduRef):
+            self.general_purpose_ref: GeneralPurposePduRef | None = general_purpose_ref
+        else:
+            raise TypeError("the general_purpose_ref must be a instance of GeneralPurposePduRef")
+
+    def add_element(self, elem: GeneralPurposePduRef | IPduPortRef) -> None:
+
+        if isinstance(elem, GeneralPurposePduRef):
+            self.general_purpose_ref = elem
+        elif isinstance(elem, IPduPortRef):
+            self.i_pdu_port_refs.append(elem)
+        else:
+            raise TypeError("the element must be a instance of GeneralPurposePduRef or IPduPortRef")
+
+
+class IPV4Configuration(ARElement):
+    """
+    tag : IPV-4-CONFIGURATION
+    parent : NETWORK-ENDPOINT-ADDRESS
+    sub:
+        DEFAULT-GATEWAY
+        IPV-4-ADDRESS
+        IPV-4-ADDRESS-SOURCE
+        NETWORK-MASK
+    """
+
+    def __init__(self,
+                 name: str,
+                 default_gateway: str,
+                 ipv4_address: str,
+                 ipv4_address_source: str,
+                 network_mask: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.default_gateway = default_gateway
+        self.ipv4_address = ipv4_address
+        self.ipv4_address_source = ipv4_address_source
+        self.network_mask = network_mask
+
+
+class NetworkEndpointAddress(ARElement):
+    """
+    tag : NETWORK-ENDPOINT-ADDRESS
+    parent : NETWORK-ENDPOINTS
+    sub:
+        IPV-4-CONFIGURATION
+    """
+
+    def __init__(self,
+                 name: str,
+                 ipv4_configuration: IPV4Configuration,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+        if isinstance(ipv4_configuration, IPV4Configuration):
+            ipv4_configuration.parent = self
+            self.ipv4_configuration = ipv4_configuration
+        else:
+            raise TypeError("the ipv4_configuration must be a instance of IPV4Configuration")
+
+
+class NetworkEndPoint(ARElement):
+    """
+    tag : NETWORK-ENDPOINT
+    sub :
+        SHORT-NAME
+        NETWORK-ENDPOINT-ADDRESS
+    """
 
     def __init__(self,
                  name: str,
                  **kwargs: dict):
         super().__init__(name, **kwargs)
+        self.network_endpoint_address_list: list[NetworkEndpointAddress] = []
+
+    def add_element(self, elem: NetworkEndpointAddress) -> None:
+
+        if isinstance(elem, NetworkEndpointAddress):
+            elem.parent = self
+            self.network_endpoint_address_list.append(elem)
+        else:
+            raise TypeError("the network endpoint address must be a instance of NetworkEndpointAddress")
+
+
+class SocketConnectionIPduIdentifier(ARElement):
+    """
+    tag : SOCKET-CONNECTION-IPDU-IDENTIFIER
+    sub:
+        HEADER-ID
+        PDU-TRIGGERING-REF
+    """
+
+    def __init__(self,
+                 name: str,
+                 header_identifier: int,
+                 pdu_triggering_ref: PDUTriggeringRef | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.header_identifier = header_identifier
+
+        if isinstance(pdu_triggering_ref, PDUTriggeringRef):
+            self.pdu_triggering_ref = pdu_triggering_ref
+        else:
+            raise TypeError("pdu_triggering_ref must be a instance of PDUTriggeringRef")
+
+
+class SocketConnection(ARElement):
+    """
+    tag: SOCKET-CONNECTION
+    parent: SOCKET-CONNECTIONS->SOCKET-CONNECTION-BUNDLE
+    sub:
+        CLIENT-PORT-REF
+        PDUS
+            SOCKET-CONNECTION-IPDU-IDENTIFIER
+    """
+
+    def __init__(self,
+                 name: str,
+                 client_port_ref: SocketAddressRef | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.pdus: list[SocketConnectionIPduIdentifier] = []
+
+        if isinstance(client_port_ref, SocketAddressRef):
+            self.client_port_ref = client_port_ref
+        else:
+            raise TypeError("client port ref must be a instance of SocketAddressRef")
+
+    def add_element(self, elem: SocketConnectionIPduIdentifier) -> None:
+        assert isinstance(elem, SocketConnectionIPduIdentifier)
+        elem.parent = self
+        self.pdus.append(elem)
+
+
+class SocketConnectionBundle(ARElement):
+    """
+    tag : SOCKET-CONNECTION-BUNDLE
+    sub:
+        SHORT-NAME
+        BUNDLED-CONNECTIONS
+            SOCKET-CONNECTION
+        SERVER-PORT-REF
+    """
+
+    def __init__(self,
+                 name: str,
+                 server_port_ref: SocketAddressRef | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.bundled_connections: list[SocketConnection] = []
+
+        if isinstance(server_port_ref, SocketAddressRef):
+            self.server_port_ref = server_port_ref
+        else:
+            raise TypeError("server port ref must be a instance of SocketAddressRef")
+
+    def add_element(self, elem: SocketConnection) -> None:
+
+        assert isinstance(elem, SocketConnection)
+        elem.parent = self
+        self.bundled_connections.append(elem)
+
+
+class UdpTP(ARElement):
+    """
+    tag: UDP-TP
+    parent: TP-CONFIGURATION
+    sub:
+        UDP-TP-PORT
+            PORT-NUMBER
+    """
+
+    def __init__(self,
+                 name: str,
+                 udp_tp_port_number: int,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.udp_tp_port_number = udp_tp_port_number
+
+
+class ApplicationEndpoint(ARElement):
+    """
+    tag : APPLICATION-ENDPOINT
+    parent: SOCKET-ADDRESS
+    sub :
+        SHORT-NAME
+        NETWORK-ENDPOINT-REF
+        TP-CONFIGURATION
+    """
+
+    def __init__(self,
+                 name: str,
+                 network_endpoint_ref: NetworkEndpointRef | None = None,
+                 udp_tp: UdpTP | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+        if isinstance(udp_tp, UdpTP):
+            udp_tp.parent = self
+            self.udp_tp = udp_tp
+        else:
+            raise TypeError("the udp_tp must be an instance of UdpTP")
+
+        if isinstance(network_endpoint_ref, NetworkEndpointRef):
+            self.network_endpoint_ref = network_endpoint_ref
+        else:
+            raise TypeError("the network_endpoint_ref must be an instance of NetworkEndpointRef")
+
+    def set_network_endpoint_ref(self, network_endpoint_ref: NetworkEndpointRef) -> None:
+
+        if isinstance(network_endpoint_ref, NetworkEndpointRef):
+            self.network_endpoint_ref = network_endpoint_ref
+        else:
+            raise TypeError("the network_endpoint_ref must be an instance of NetworkEndpointRef")
+
+
+class SocketAddress(ARElement):
+    """
+    tag : SOCKET-ADDRESS
+    parent: SOCKET-ADDRESSS
+    sub :
+        SHORT-NAME
+        APPLICATION-ENDPOINT
+    """
+
+    def __init__(self,
+                 name: str,
+                 application_endpoint: ApplicationEndpoint | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+        if isinstance(application_endpoint, ApplicationEndpoint):
+            application_endpoint.parent = application_endpoint
+            self.applications_endpoint = application_endpoint
+        else:
+            raise TypeError("the application_endpoint must be an instance of ApplicationEndpoint")
+
+
+class SoAdConfig(ARElement):
+    """
+    tag : SO-AD-CONFIG
+    parent: ETHERNET-PHYSICAL-CHANNEL
+    sub:
+        CONNECTION-BUNDLES
+        SOCKET-ADDRESS
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.connection_bundles: list[SocketConnectionBundle] = []
+        self.socket_addresss: list[SocketAddress] = []
+
+    def add_element(self, elem: SocketAddress | SocketConnectionBundle) -> None:
+
+        if isinstance(elem, SocketAddress):
+            elem.parent = self
+            self.socket_addresss.append(elem)
+        elif isinstance(elem, SocketConnectionBundle):
+            elem.parent = self
+            self.connection_bundles.append(elem)
+        else:
+            raise TypeError("element must be a SocketAddress or SocketConnectionBundle")
 
 
 class EthernetPhysicalChannel(ARElement):
@@ -6307,18 +6775,133 @@ class EthernetPhysicalChannel(ARElement):
                  name: str,
                  **kwargs: dict):
         super().__init__(name, **kwargs)
+        self.comm_connectors_refs: list[EthernetCommunicationConnectorRef] = []
+        self.i_signal_triggerings: list[ISignalTriggeringElement] = []
+        self.pdu_triggerings: list[PduTriggering] = []
+        self.network_endpoints: list[NetworkEndPoint] = []
+        self.so_ad_config: SoAdConfig | None = None
+
+    def add_comm_connector_ref(self, elem: EthernetCommunicationConnectorRef) -> None:
+
+        if isinstance(elem, EthernetCommunicationConnectorRef):
+            self.comm_connectors_refs.append(elem)
+        else:
+            raise TypeError("the element must be a instance of EthernetCommunicationConnectorRef")
+
+    def add_i_signal_trigger(self, elem: ISignalTriggeringElement) -> None:
+
+        if isinstance(elem, ISignalTriggeringElement):
+            elem.parent = self,
+            self.i_signal_triggerings.append(elem)
+        else:
+            raise TypeError("the element must be a instance of ISignalTriggeringElement")
+
+    def add_pdu_triggering(self, elem: PduTriggering) -> None:
+
+        if isinstance(elem, PduTriggering):
+            elem.parent = self
+            self.pdu_triggerings.append(elem)
+        else:
+            raise TypeError("the element must be a instance of PduTrigger")
+
+    def add_network_endpoints(self, elem: NetworkEndPoint) -> None:
+        if isinstance(elem, NetworkEndPoint):
+            elem.parent = self
+            self.network_endpoints.append(elem)
+        else:
+            raise TypeError("the element must be a instance of NetworkEndPoint")
+
+    def add_so_ad_config(self, elem: SoAdConfig) -> None:
+        if isinstance(elem, SoAdConfig):
+            elem.parent = self
+            self.so_ad_config = elem
+        else:
+            raise TypeError("the element must be a instance of SoAdConfig")
 
 
-class EthernetClusterConditional(EthernetClusterVariantElement):
+class CouplingPortConnection(ARElement):
+    """
+    tag : COUPLING-PORT-CONNECTION
+    parent: COUPLING-PORT-CONNECTIONS -> ETHERNET-CLUSTER-CONDITIONAL
+    sub:
+        FIRST-PORT-REF
+        SECOND-PORT-REF
+    """
+
+    def __init__(self,
+                 name: str,
+                 first_port_ref: CouplingPortRef | None = None,
+                 second_port_ref: CouplingPortRef | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+
+        if isinstance(first_port_ref, CouplingPortRef):
+            self.first_port_ref = first_port_ref
+        else:
+            raise TypeError("first port ref must be a instance of CouplingPortRef")
+
+        if isinstance(second_port_ref, CouplingPortRef):
+            self.second_port_ref = second_port_ref
+        else:
+            raise TypeError("first port ref must be a instance of CouplingPortRef")
+
+
+class EthernetClusterConditional(ARElement):
+    """
+    tag : ETHERNET-CLUSTER-CONDITIONAL
+    sub:
+        PHYSICAL-CHANNELS
+            ETHERNET-PHYSICAL-CHANNEL
+        COUPLING-PORT-CONNECTIONS
+            COUPLING-PORT-CONNECTION
+    """
+
     def __init__(self,
                  name: str,
                  **kwargs: dict):
         super().__init__(name, **kwargs)
+        self.physical_channels: list[EthernetPhysicalChannel] = []  # for sub element ETHERNET-PHYSICAL-CHANNEL1.
+        self.coupling_port_connections: list[CouplingPortConnection] = []  # for sub element COUPLING-PORT-CONNECTIONS
+
+    def add_ethernet_physical_channel(self, elem: EthernetPhysicalChannel) -> None:
+        assert isinstance(elem, EthernetPhysicalChannel)
+        elem.parent = self
+        self.physical_channels.append(elem)
+
+    def add_coupling_port_connection(self, elem: CouplingPortConnection) -> None:
+        assert isinstance(elem, CouplingPortConnection)
+        elem.parent = self
+        self.coupling_port_connections.append(elem)
+
+
+# class EthernetClusterVariantElement(ARElement):
+#     """
+#     tag : ETHERNET-CLUSTER-VARIANT
+#     sub : ETHERNET-CLUSTER-CONDITIONAL
+#     parent: ETHERNET-CLUSTER
+#     """
+#
+#     def __init__(self,
+#                  name: str,
+#                  **kwargs: dict):
+#         super().__init__(name, **kwargs)
 
 
 class TopologyClusterElement(ARElement):
+    """
+    tag : ETHERNET-CLUSTER
+    sub :
+        ETHERNET-CLUSTER-CONDITIONAL
+    parent: ELEMENTS
+    """
 
     def __init__(self,
                  name: str,
                  **kwargs: dict):
         super().__init__(name, **kwargs)
+        self.sub_element: list[EthernetClusterConditional] = []
+
+    def add_element(self, elem: EthernetClusterConditional) -> None:
+        assert isinstance(elem, EthernetClusterConditional)
+        elem.parent = self
+        self.sub_element.append(elem)
