@@ -225,6 +225,8 @@ class Writer(_XMLWriter):
             'DataTransformationSet': self._write_data_transformation_set,
             'TransformationTechnology': self._write_transformation_technology,
             'TopologyClusterElement': self._write_topology_cluster_element,
+            'CouplingElement': self._write_coupling_element,
+            'EcuInstance': self._write_ecu_instance,
         }
         # Value specification elements
         self.switcher_value_specification = {
@@ -4078,7 +4080,6 @@ class Writer(_XMLWriter):
         self._write_coupling_port_ref(elem.second_port_ref, "SECOND-PORT-REF")
         self._leave_child()
 
-
     def _write_ethernet_cluster_conditional(self, elem: ar_element.EthernetClusterConditional) -> None:
         """
         tag : ETHERNET-CLUSTER-CONDITIONAL
@@ -4253,4 +4254,215 @@ class Writer(_XMLWriter):
         self._write_referrable(elem)
         self._write_multilanguage_referrable(elem)
         self._write_identifiable(elem)
+        self._leave_child()
+
+    def _write_ethernet_cluster_ref(self, elem: ar_element.EthernetClusterRef, tag: str) -> None:
+        """
+        tag : COMMUNICATION-CLUSTER-REF
+        dest : ETHERNET-CLUSTER
+        """
+        assert isinstance(elem, ar_element.EthernetClusterRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content(tag, elem.value, attr)
+
+    def _write_ethernet_physical_channel_ref(self, elem: ar_element.EthernetPhysicalChannelRef, tag: str) -> None:
+        """
+        tag : VLAN-REF
+        dest : ETHERNET-PHYSICAL-CHANNEL
+        """
+        assert isinstance(elem, ar_element.EthernetPhysicalChannelRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content(tag, elem.value, attr)
+
+    def _write_vlan_membership(self, elem: ar_element.VlanMemberShip) -> None:
+        """
+        tag : VLAN-MEMBERSHIP
+        sub:
+            DEFAULT-PRIORITY
+            SEND-ACTIVITY
+            VLAN-REF -> ETHERNET-PHYSICAL-CHANNEL
+        """
+        self._add_child("VLAN-MEMBERSHIP")
+
+        self._add_content("DEFAULT-PRIORITY", str(elem.default_priority))
+        self._add_content("SEND-ACTIVITY", elem.send_activity)
+        self._write_ethernet_physical_channel_ref(elem.vlan_ref, "VLAN-REF")
+        self._leave_child()
+
+    def _write_coupling_port(self, elem: ar_element.CouplingPort) -> None:
+
+        """
+        tag : COUPLING-PORT
+        sub :
+            SHORT-NAME
+            VLAN-MEMBERSHIPS
+                VLAN-MEMBERSHIP
+            CONNECTION-NEGOTIATION-BEHAVIOR
+            PHYSICAL-LAYER-TYPE
+        """
+        self._add_child("COUPLING-PORT")
+        self._write_referrable(elem)
+
+        self._add_child("VLAN-MEMBERSHIPS")
+        for vlan in elem.vlan_memberships:
+            self._write_vlan_membership(vlan)
+        self._leave_child()
+
+        if elem.connection_negotiation_behavior is not None:
+            self._add_content("CONNECTION-NEGOTIATION-BEHAVIOR", elem.connection_negotiation_behavior)
+
+        if elem.physical_layer_type is not None:
+            self._add_content("PHYSICAL-LAYER-TYPE", elem.physical_layer_type)
+
+        self._leave_child()
+
+    def _write_coupling_element(self, elem: ar_element.CouplingElement) -> None:
+
+        """
+        tag : COUPLING-ELEMENT
+        sub :
+            SHORT-NAME
+            COMMUNICATION-CLUSTER-REF
+            COUPLING-PORTS
+                COUPLING-PORT
+            COUPLING-TYPE
+        """
+
+        self._add_child("COUPLING-ELEMENT")
+        self._write_referrable(elem)
+
+        if elem.communication_cluster_ref is not None:
+            self._write_ethernet_cluster_ref(elem.communication_cluster_ref, "COMMUNICATION-CLUSTER-REF")
+
+        self._add_child("COUPLING-PORTS")
+        for port in elem.coupling_ports:
+            self._write_coupling_port(port)
+        self._leave_child()
+
+        self._add_content("COUPLING-TYPE", elem.coupling_type)
+        self._leave_child()
+
+    def _write_ethernet_communication_controller_conditional(self,
+                                                             elem: ar_element.EthernetCommunicationControllerConditional) -> None:
+
+        """
+        tag : ETHERNET-COMMUNICATION-CONTROLLER-CONDITIONAL
+        sub:
+            COUPLING-PORTS
+            MAC-UNICAST-ADDRESS
+        """
+        assert isinstance(elem, ar_element.EthernetCommunicationControllerConditional)
+        self._add_child("ETHERNET-COMMUNICATION-CONTROLLER-CONDITIONAL")
+
+        self._add_child("COUPLING-PORTS")
+        for port in elem.coupling_ports:
+            self._write_coupling_port(port)
+        self._leave_child()
+
+        self._leave_child()
+
+    def _write_ethernet_communication_controller(self, elem: ar_element.EthernetCommunicationController) -> None:
+
+        """
+            tag : ETHERNET-COMMUNICATION-CONTROLLER
+            sub:
+                SHORT-NAME
+                CATEGORY
+                ETHERNET-COMMUNICATION-CONTROLLER-VARIANTS
+        """
+        assert isinstance(elem, ar_element.EthernetCommunicationController)
+        self._add_child("ETHERNET-COMMUNICATION-CONTROLLER")
+
+        self._write_referrable(elem)
+        self._write_identifiable(elem)
+
+        self._add_child("ETHERNET-COMMUNICATION-VARIANTS")
+        for sub in elem.ethernet_communication_controller_variant:
+            self._write_ethernet_communication_controller_conditional(sub)
+
+        self._leave_child()
+        self._leave_child()
+
+    def _write_ethernet_communication_controller_ref(self, elem: ar_element.EthernetCommunicationControllerRef, tag: str):
+        """
+        tag : COMM-CONTROLLER-REF
+        dest: ETHERNET-COMMUNICATION-CONTROLLER
+        """
+        assert isinstance(elem, ar_element.EthernetCommunicationControllerRef)
+        attr: TupleList = []
+        self._collect_base_ref_attr(elem, attr)
+        self._add_content(tag, elem.value, attr)
+
+
+    def _write_i_signal_port(self, elem: ar_element.ISignalPort) -> None:
+        """
+        tag: I-SIGNAL-PORT
+        sub:
+            SHORT-NAME
+            COMMUNICATION-DIRECTION
+        """
+        self._add_child("I-SIGNAL-PORT")
+        self._write_referrable(elem)
+        self._add_content("COMMUNICATION-DIRECTION", elem.communication_direction)
+        self._leave_child()
+
+
+    def _write_ethernet_communication_connector(self, elem: ar_element.EthernetCommunicationConnector) -> None:
+
+        """
+        tag : ETHERNET-COMMUNICATION-CONNECTOR
+        sub :
+            SHORT-NAME
+            CATEGORY
+            COMM-CONTROLLER-REF -> ETHERNET-COMMUNICATION-CONTROLLER
+            ECU-COMM-PORT-INSTANCES
+            NETWORK-ENDPOINT-REFS -> NETWORK-ENDPOINT
+        """
+        self._add_child("ETHERNET-COMMUNICATION-CONNECTOR")
+
+        self._write_referrable(elem)
+        self._write_identifiable(elem)
+        self._write_ethernet_communication_controller_ref(elem.comm_controller_ref, "COMM-CONTROLLER-REF")
+
+        self._add_child("ECU-COMM-PORT-INSTANCES")
+        for sub in elem.ecu_comm_port_instances:
+            self._write_i_signal_port(sub)
+        self._leave_child()
+
+        self._add_child("NETWORK-ENDPOINT-REFS")
+        for sub in elem.network_endpoint_refs:
+            self._write_network_endpoint_ref(sub, "NETWORK-ENDPOINT-REF")
+        self._leave_child()
+
+        self._leave_child()
+
+
+    def _write_ecu_instance(self, elem: ar_element.EcuInstance) -> None:
+        """
+        tag: ECU-INSTANCE
+        sub:
+            SHORT-NAME
+            COMM-CONTROLLERS
+            CONNECTORS
+            SLEEP-MODE-SUPPORTED
+            WAKE-UP-OVER-BUS-SUPPORTED
+        """
+        self._add_child("ECU-INSTANCE")
+
+        self._write_referrable(elem)
+        self._add_content("SLEEP-MODE-SUPPORTED", str(elem.sleep_mode_supported).lower())
+        self._add_content("WAKE-UP-OVER-BUS-SUPPORTED", str(elem.wakeup_over_buf_supported).lower())
+
+        self._add_child("COMM-CONTROLLERS")
+        for sub in elem.comm_controllers:
+            self._write_ethernet_communication_controller(sub)
+        self._leave_child()
+
+        self._add_child("CONNECTORS")
+        for sub in elem.connectors:
+            self._write_ethernet_communication_connector(sub)
+        self._leave_child()
+
         self._leave_child()

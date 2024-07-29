@@ -84,7 +84,7 @@ class CompuScaleContent(Enum):
     content type of CompuScale elements
     """
 
-    NONE = 0      # No content
+    NONE = 0  # No content
     CONSTANT = 1  # Content is AR:COMPU-SCALE-CONSTANT-CONTENTS
     RATIONAL = 2  # Content is COMPU-SCALE-RATIONAL-FORMULA
 
@@ -253,6 +253,11 @@ class IdentifiableSubTypes(Enum):
     ETHERNET_COMMUNICATION_CONTROLLER = 59
     I_PDU_PORT = 60
     GENERAL_PURPOSE_PDU = 61
+    ETHERNET_CLUSTER = 62
+    COUPLING_ELEMENT = 63
+    ROOT_SW_COMPONENT_PROTOTYPE = 64
+    ECU_INSTANCE = 65
+    ROOT_SW_COMPOSITION_PROTOTYPE = 66
 
 class IntervalType(Enum):
     """
@@ -584,6 +589,7 @@ class VariableAccessScope(Enum):
     COMMUNICATION_INTRA_PARTITION = 1
     INTER_PARTITION_INTRA_ECU = 2
 
+
 ########################################
 
 
@@ -711,7 +717,8 @@ xml_to_enum_map: dict[str, dict] = {
         "APPLICATION-ARRAY-DATA-TYPE": IdentifiableSubTypes.APPLICATION_ARRAY_DATA_TYPE,
         "APPLICATION-ARRAY-ELEMENT": IdentifiableSubTypes.APPLICATION_ARRAY_ELEMENT,
         "APPLICATION-COMPOSITE-DATA-TYPE": IdentifiableSubTypes.APPLICATION_COMPOSITE_DATA_TYPE,
-        "APPLICATION-COMPOSITE-ELEMENT-DATA-PROTOTYPE": IdentifiableSubTypes.APPLICATION_COMPOSITE_ELEMENT_DATA_PROTOTYPE, # noqa E501 pylint: disable=C0301
+        "APPLICATION-COMPOSITE-ELEMENT-DATA-PROTOTYPE": IdentifiableSubTypes.APPLICATION_COMPOSITE_ELEMENT_DATA_PROTOTYPE,
+        # noqa E501 pylint: disable=C0301
         "APPLICATION-DATA-TYPE": IdentifiableSubTypes.APPLICATION_DATA_TYPE,
         "APPLICATION-DEFERRED-DATA-TYPE": IdentifiableSubTypes.APPLICATION_DEFERRED_DATA_TYPE,
         "APPLICATION-ERROR": IdentifiableSubTypes.APPLICATION_ERROR,
@@ -765,6 +772,11 @@ xml_to_enum_map: dict[str, dict] = {
         "ETHERNET-COMMUNICATION-CONTROLLER": IdentifiableSubTypes.ETHERNET_COMMUNICATION_CONTROLLER,
         "I-PDU-PORT": IdentifiableSubTypes.I_PDU_PORT,
         "GENERAL-PURPOSE-PDU": IdentifiableSubTypes.GENERAL_PURPOSE_PDU,
+        "ETHERNET_CLUSTER": IdentifiableSubTypes.ETHERNET_CLUSTER,
+        "COUPLING-ELEMENT": IdentifiableSubTypes.COUPLING_ELEMENT,
+        "ROOT-SW-COMPONENT-PROTOTYPE": IdentifiableSubTypes.ROOT_SW_COMPONENT_PROTOTYPE,
+        "ECU-INSTANCE": IdentifiableSubTypes.ECU_INSTANCE,
+        "ROOT-SW-COMPOSITION-PROTOTYPE": IdentifiableSubTypes.ROOT_SW_COMPOSITION_PROTOTYPE,
     },
     "IntervalType": {
         "CLOSED": IntervalType.CLOSED,
@@ -996,63 +1008,63 @@ enum_to_xml_map: dict[str, list] = {
         "OUT",  # 2
     ],
     "ArrayImplPolicy": [
-        VersionedTextValue("PAYLOAD-AS-ARRAY", {49, 50, 51}),             # 0
+        VersionedTextValue("PAYLOAD-AS-ARRAY", {49, 50, 51}),  # 0
         VersionedTextValue("PAYLOAD-AS-POINTER-TO-ARRAY", {49, 50, 51}),  # 1
     ],
     "ArraySizeHandling": [
-        "ALL-INDICES-DIFFERENT-ARRAY-SIZE",       # 0
-        "ALL-INDICES-SAME-ARRAY-SIZE",            # 1
+        "ALL-INDICES-DIFFERENT-ARRAY-SIZE",  # 0
+        "ALL-INDICES-SAME-ARRAY-SIZE",  # 1
         "INHERITED-FROM-ARRAY-ELEMENT-TYPE-SIZE"  # 2
     ],
     "ArraySizeSemantics": [
-        "FIXED-SIZE",     # 0
+        "FIXED-SIZE",  # 0
         "VARIABLE-SIZE",  # 1
     ],
     "ByteOrder": [
         "MOST-SIGNIFICANT-BYTE-FIRST",  # 0
-        "MOST-SIGNIFICANT-BYTE-LAST",   # 1
-        "OPAQUE",                       # 2
+        "MOST-SIGNIFICANT-BYTE-LAST",  # 1
+        "OPAQUE",  # 2
     ],
     "CalibrationAxisCategory": [
-        "COM-AXIS",    # 0
+        "COM-AXIS",  # 0
         "CURVE-AXIS",  # 1
-        "FIX-AXIS",    # 2
-        "RES-AXIS",    # 3
-        "STD-AXIS"     # 4
+        "FIX-AXIS",  # 2
+        "RES-AXIS",  # 3
+        "STD-AXIS"  # 4
     ],
     "DataFilterType": [
-        "ALWAYS",                         # 0
+        "ALWAYS",  # 0
         "MASKED-NEW-DIFFERS-MASKED-OLD",  # 1
-        "MASKED-NEW-DIFFERS-X",           # 2
-        "MASKED-NEW-EQUALS-X",            # 3
-        "NEVER",                          # 4
-        "NEW-IS-OUTSIDE",                 # 5
-        "NEW-IS-WITHIN",                  # 6
-        "ONE-EVERY-N"                     # 7
+        "MASKED-NEW-DIFFERS-X",  # 2
+        "MASKED-NEW-EQUALS-X",  # 3
+        "NEVER",  # 4
+        "NEW-IS-OUTSIDE",  # 5
+        "NEW-IS-WITHIN",  # 6
+        "ONE-EVERY-N"  # 7
     ],
     "DisplayPresentation": [
         "PRESENTATION-CONTINUOUS",  # 0
-        "PRESENTATION-DISCRETE",    # 1
+        "PRESENTATION-DISCRETE",  # 1
     ],
     "EmphasisFont": [
         "DEFAULT",  # 0
-        "MONO",     # 1
+        "MONO",  # 1
     ],
     "EmphasisType": [
-        "BOLD",        # 0
+        "BOLD",  # 0
         "BOLDITALIC",  # 1
-        "ITALIC",      # 2
-        "PLAIN",       # 3
+        "ITALIC",  # 2
+        "PLAIN",  # 3
     ],
     "Float": [
-        "FLOAT",     # 0
+        "FLOAT",  # 0
         "NO-FLOAT",  # 1
     ],
     "HandleInvalid": [
-        "DONT-INVALIDATE",       # 0
+        "DONT-INVALIDATE",  # 0
         "EXTERNAL-REPLACEMENT",  # 1
-        "KEEP",                  # 2
-        "REPLACE",               # 3
+        "KEEP",  # 2
+        "REPLACE",  # 3
     ],
     "HandleOutOfRange": [
         "DEFAULT",
@@ -1063,77 +1075,82 @@ enum_to_xml_map: dict[str, list] = {
         "SATURATE"
     ],
     "HandleOutOfRangeStatus": [
-        "INDICATE",            # 0
-        "SILENT"               # 1
+        "INDICATE",  # 0
+        "SILENT"  # 1
     ],
     "HandleTimeout": [
-        "NONE",                                   # 0
-        "REPLACE",                                # 1
-        "REPLACE-BY-TIMEOUT-SUBSTITUTION-VALUE"   # 2
+        "NONE",  # 0
+        "REPLACE",  # 1
+        "REPLACE-BY-TIMEOUT-SUBSTITUTION-VALUE"  # 2
     ],
     "IdentifiableSubTypes": [
-        "ABSTRACT-IMPLEMENTATION-DATA-TYPE",             # 0
-        "ABSTRACT-IMPLEMENTATION-DATA-TYPE-ELEMENT",     # 1
-        "ABSTRACT-PROVIDED-PORT-PROTOTYPE",              # 2
-        "ABSTRACT-REQUIRED-PORT-PROTOTYPE",              # 3
-        "APPLICATION-ARRAY-DATA-TYPE",                   # 4
-        "APPLICATION-ARRAY-ELEMENT",                     # 5
-        "APPLICATION-COMPOSITE-DATA-TYPE",               # 6
+        "ABSTRACT-IMPLEMENTATION-DATA-TYPE",  # 0
+        "ABSTRACT-IMPLEMENTATION-DATA-TYPE-ELEMENT",  # 1
+        "ABSTRACT-PROVIDED-PORT-PROTOTYPE",  # 2
+        "ABSTRACT-REQUIRED-PORT-PROTOTYPE",  # 3
+        "APPLICATION-ARRAY-DATA-TYPE",  # 4
+        "APPLICATION-ARRAY-ELEMENT",  # 5
+        "APPLICATION-COMPOSITE-DATA-TYPE",  # 6
         "APPLICATION-COMPOSITE-ELEMENT-DATA-PROTOTYPE",  # 7
-        "APPLICATION-DATA-TYPE",                         # 8
-        "APPLICATION-DEFERRED-DATA-TYPE",                # 9
-        "APPLICATION-ERROR",                             # 10
-        "APPLICATION-PRIMITIVE-DATA-TYPE",               # 11
-        "APPLICATION-RECORD-DATA-TYPE",                  # 12
-        "APPLICATION-RECORD-ELEMENT",                    # 13
-        "APPLICATION-SW-COMPONENT-TYPE",                 # 14
-        "ARGUMENT-DATA-PROTOTYPE",                       # 15
-        "AR-PACKAGE",                                    # 16
-        "AUTOSAR-DATA-PROTOTYPE",                        # 17
-        "AUTOSAR-DATA-TYPE",                             # 18
-        "BSW-MODULE-ENTRY",                              # 19
-        "CLIENT-SERVER-INTERFACE",                       # 20
-        "CLIENT-SERVER-OPERATION",                       # 21
-        "COMPOSITION-SW-COMPONENT-TYPE",                 # 22
-        "COMPU-METHOD",                                  # 23
-        "CONSTANT-SPECIFICATION",                        # 24
-        "DATA-CONSTR",                                   # 25
-        "DATA-PROTOTYPE",                                # 26
-        "E-2-E-PROFILE-COMPATIBILITY-PROPS",             # 27
-        "IMPLEMENTATION-DATA-TYPE",                      # 28
-        "IMPLEMENTATION-DATA-TYPE-ELEMENT",              # 29
-        "MODE-DECLARATION",                              # 30
-        "MODE-DECLARATION-GROUP",                        # 31
-        "MODE-DECLARATION-GROUP-PROTOTYPE",              # 32
-        "MODE-SWITCH-INTERFACE",                         # 33
-        "NV-DATA-INTERFACE",                             # 34
-        "P-PORT-PROTOTYPE",                              # 35
-        "PARAMETER-INTERFACE",                           # 36
-        "PARAMETER-DATA-PROTOTYPE",                      # 37
-        "PHYSICAL-DIMENSION",                            # 38
-        "PORT-PROTOTYPE",                                # 39
-        "PR-PORT-PROTOTYPE",                             # 40
-        "R-PORT-PROTOTYPE",                              # 41
-        "SENDER-RECEIVER-INTERFACE",                     # 42
-        "SW-ADDR-METHOD",                                # 43
-        "SW-BASE-TYPE",                                  # 44
-        "SW-COMPONENT-PROTOTYPE",                        # 45
-        "SWC-IMPLEMENTATION",                            # 46
-        "SWC-INTERNAL-BEHAVIOR",                         # 47
-        "UNIT",                                          # 48
-        "VARIABLE-DATA-PROTOTYPE",                       # 49
-        "TRANSFORMATION-TECHNOLOGY",                     # 50
-        "ETHERNET-COMMUNICATION-CONNECTOR",              # 51
-        "I-SIGNAL-PORT",                                 # 52
-        "I-SIGNAL",                                      # 53
-        "SOCKET-ADDRESS",                                # 54
-        "PDU-TRIGGERING",                                # 55
-        "NETWORK-ENDPOINT",                              # 56
-        "COUPLING-PORT",                                 # 57
-        "ETHERNET-PHYSICAL-CHANNEL",                     # 58
-        "ETHERNET-COMMUNICATION-CONTROLLER",             # 59
-        "I-PDU-PORT",                                    # 60
-        "GENERAL-PURPOSE-PDU",                           # 61
+        "APPLICATION-DATA-TYPE",  # 8
+        "APPLICATION-DEFERRED-DATA-TYPE",  # 9
+        "APPLICATION-ERROR",  # 10
+        "APPLICATION-PRIMITIVE-DATA-TYPE",  # 11
+        "APPLICATION-RECORD-DATA-TYPE",  # 12
+        "APPLICATION-RECORD-ELEMENT",  # 13
+        "APPLICATION-SW-COMPONENT-TYPE",  # 14
+        "ARGUMENT-DATA-PROTOTYPE",  # 15
+        "AR-PACKAGE",  # 16
+        "AUTOSAR-DATA-PROTOTYPE",  # 17
+        "AUTOSAR-DATA-TYPE",  # 18
+        "BSW-MODULE-ENTRY",  # 19
+        "CLIENT-SERVER-INTERFACE",  # 20
+        "CLIENT-SERVER-OPERATION",  # 21
+        "COMPOSITION-SW-COMPONENT-TYPE",  # 22
+        "COMPU-METHOD",  # 23
+        "CONSTANT-SPECIFICATION",  # 24
+        "DATA-CONSTR",  # 25
+        "DATA-PROTOTYPE",  # 26
+        "E-2-E-PROFILE-COMPATIBILITY-PROPS",  # 27
+        "IMPLEMENTATION-DATA-TYPE",  # 28
+        "IMPLEMENTATION-DATA-TYPE-ELEMENT",  # 29
+        "MODE-DECLARATION",  # 30
+        "MODE-DECLARATION-GROUP",  # 31
+        "MODE-DECLARATION-GROUP-PROTOTYPE",  # 32
+        "MODE-SWITCH-INTERFACE",  # 33
+        "NV-DATA-INTERFACE",  # 34
+        "P-PORT-PROTOTYPE",  # 35
+        "PARAMETER-INTERFACE",  # 36
+        "PARAMETER-DATA-PROTOTYPE",  # 37
+        "PHYSICAL-DIMENSION",  # 38
+        "PORT-PROTOTYPE",  # 39
+        "PR-PORT-PROTOTYPE",  # 40
+        "R-PORT-PROTOTYPE",  # 41
+        "SENDER-RECEIVER-INTERFACE",  # 42
+        "SW-ADDR-METHOD",  # 43
+        "SW-BASE-TYPE",  # 44
+        "SW-COMPONENT-PROTOTYPE",  # 45
+        "SWC-IMPLEMENTATION",  # 46
+        "SWC-INTERNAL-BEHAVIOR",  # 47
+        "UNIT",  # 48
+        "VARIABLE-DATA-PROTOTYPE",  # 49
+        "TRANSFORMATION-TECHNOLOGY",  # 50
+        "ETHERNET-COMMUNICATION-CONNECTOR",  # 51
+        "I-SIGNAL-PORT",  # 52
+        "I-SIGNAL",  # 53
+        "SOCKET-ADDRESS",  # 54
+        "PDU-TRIGGERING",  # 55
+        "NETWORK-ENDPOINT",  # 56
+        "COUPLING-PORT",  # 57
+        "ETHERNET-PHYSICAL-CHANNEL",  # 58
+        "ETHERNET-COMMUNICATION-CONTROLLER",  # 59
+        "I-PDU-PORT",  # 60
+        "GENERAL-PURPOSE-PDU",  # 61
+        "ETHERNET_CLUSTER",  # 62
+        "COUPLING-ELEMENT",  # 63
+        "ROOT-SW-COMPONENT-PROTOTYPE",      # 64
+        "ECU-INSTANCE",                     # 65
+        "ROOT-SW-COMPOSITION-PROTOTYPE",    # 66
     ],
     "IntervalType": [
         "CLOSED",  # 0
@@ -1284,57 +1301,57 @@ enum_to_xml_map: dict[str, list] = {
     ],
     "ModeErrorReactionPolicy": [
         "DEFAULT-MODE",  # 0
-        "LAST-MODE"      # 1
+        "LAST-MODE"  # 1
     ],
     "Monotony": [
-        "DECREASING",           # 0
-        "INCREASING",           # 1
-        "MONOTONOUS",           # 2
-        "NO-MONOTONY",          # 3
+        "DECREASING",  # 0
+        "INCREASING",  # 1
+        "MONOTONOUS",  # 2
+        "NO-MONOTONY",  # 3
         "STRICTLY-DECREASING",  # 4
         "STRICTLY-INCREASING",  # 5
-        "STRICT-MONOTONOUS",    # 6
+        "STRICT-MONOTONOUS",  # 6
     ],
     "PageBreak": [
-        "BREAK",     # 0
+        "BREAK",  # 0
         "NO-BREAK",  # 1
     ],
     "PageWide": [
         "NO-PGWIDE",  # 0
-        "PGWIDE",     # 1
+        "PGWIDE",  # 1
     ],
     "ScaleConstraintValidity": [
         "NOT-AVAILABLE",  # 0
-        "NOT-DEFINED",    # 1
-        "NOT-VALID",      # 2
-        "VALID"           # 3
+        "NOT-DEFINED",  # 1
+        "NOT-VALID",  # 2
+        "VALID"  # 3
     ],
     "ServerArgImplPolicy": [
-        "USE-ARGUMENT-TYPE",    # 0
+        "USE-ARGUMENT-TYPE",  # 0
         "USE-ARRAY-BASE-TYPE",  # 1
-        "USE-VOID",             # 2
+        "USE-VOID",  # 2
     ],
     "SwCalibrationAccess": [
         "NOT-ACCESSIBLE",  # 0
-        "READ-ONLY",       # 1
-        "READ-WRITE"       # 2
+        "READ-ONLY",  # 1
+        "READ-WRITE"  # 2
     ],
     "SwImplPolicy": [
-        "CONST",              # 0
-        "FIXED",              # 1
+        "CONST",  # 0
+        "FIXED",  # 1
         "MEASUREMENT-POINT",  # 2
-        "QUEUED",             # 3
-        "STANDARD"            # 4
+        "QUEUED",  # 3
+        "STANDARD"  # 4
     ],
     "TransmissionMode": [
-        "CYCLIC",                # 0
+        "CYCLIC",  # 0
         "CYCLIC-AND-ON-CHANGE",  # 1
-        "TRIGGERED"              # 2
+        "TRIGGERED"  # 2
     ],
     "VariableAccessScope": [
-        "COMMUNICATION-INTER-ECU",        # 0
+        "COMMUNICATION-INTER-ECU",  # 0
         "COMMUNICATION-INTRA-PARTITION",  # 1
-        "INTER-PARTITION-INTRA-ECU",      # 2
+        "INTER-PARTITION-INTRA-ECU",  # 2
     ]
 }
 

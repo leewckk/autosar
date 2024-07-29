@@ -6306,10 +6306,10 @@ class ISignalPortRef(BaseRef):
     def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
         return {ar_enum.IdentifiableSubTypes.I_SIGNAL_PORT}
 
-    def __init__(self,
-                 name: str,
-                 **kwargs: dict):
-        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.I_SIGNAL_PORT)
+    # def __init__(self,
+    #              name: str,
+    #              **kwargs: dict):
+    #     super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.I_SIGNAL_PORT)
 
 
 class ISignalRef(BaseRef):
@@ -6874,19 +6874,6 @@ class EthernetClusterConditional(ARElement):
         self.coupling_port_connections.append(elem)
 
 
-# class EthernetClusterVariantElement(ARElement):
-#     """
-#     tag : ETHERNET-CLUSTER-VARIANT
-#     sub : ETHERNET-CLUSTER-CONDITIONAL
-#     parent: ETHERNET-CLUSTER
-#     """
-#
-#     def __init__(self,
-#                  name: str,
-#                  **kwargs: dict):
-#         super().__init__(name, **kwargs)
-
-
 class TopologyClusterElement(ARElement):
     """
     tag : ETHERNET-CLUSTER
@@ -6905,3 +6892,478 @@ class TopologyClusterElement(ARElement):
         assert isinstance(elem, EthernetClusterConditional)
         elem.parent = self
         self.sub_element.append(elem)
+
+
+class VlanMemberShip(ARElement):
+    """
+    tag: VLAN-MEMBERSHIP
+    sub :
+        DEFAULT-PRIORITY
+        SEND-ACTIVITY
+        VLAN-REF -> ETHERNET-PHYSICAL-CHANNEL
+    """
+
+    def __init__(self,
+                 name: str,
+                 default_priority: int,
+                 send_activity: str,
+                 vlan_ref: EthernetPhysicalChannelRef,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.default_priority = default_priority
+        self.send_activity = send_activity
+        self.vlan_ref = vlan_ref
+
+    def set_vlan_ref(self, ref: EthernetPhysicalChannelRef) -> None:
+        self.vlan_ref = ref
+
+
+class CouplingPort(ARElement):
+    """
+    tag: COUPLING-PORT
+    sub:
+        SHORT-NAME
+        VLAN-MEMBERSHIPS
+
+    parent: COUPLING-ELEMENT
+    """
+
+    def __init__(self,
+                 name: str,
+                 connection_negotiation_behavior: str | None = None,
+                 physical_layer_type: str | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.vlan_memberships: list[VlanMemberShip] = []
+        self.connection_negotiation_behavior = connection_negotiation_behavior
+        self.physical_layer_type = physical_layer_type
+
+    def add_vlan_membership(self, sub: VlanMemberShip) -> None:
+        assert isinstance(sub, VlanMemberShip)
+        sub.parent = self
+        self.vlan_memberships.append(sub)
+
+
+class EthernetClusterRef(BaseRef):
+    """
+    tag : COMMUNICATION-CLUSTER-REF
+    dest: ETHERNET-CLUSTER
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.ETHERNET_CLUSTER)
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.ETHERNET_CLUSTER}
+
+
+class CouplingElement(ARElement):
+    """
+    tag: COUPLING-ELEMENT
+    sub:
+        SHORT-NAME
+        COMMUNICATION-CLUSTER-REF -> ETHERNET-CLUSTER
+        COUPLING-PORTS
+        COUPLING-TYPE
+    """
+
+    def __init__(self,
+                 name: str,
+                 communication_cluster_ref: EthernetClusterRef,
+                 coupling_type: str | None = None,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.communication_cluster_ref = communication_cluster_ref
+        self.coupling_ports: list[CouplingPort] = []
+        self.coupling_type = coupling_type
+
+    def add_coupling_port(self, port: CouplingPort) -> None:
+        assert isinstance(port, CouplingPort)
+        port.parent = self
+        self.coupling_ports.append(port)
+
+
+class EthernetCommunicationControllerConditional(ARElement):
+    """
+    tag: ETHERNET-COMMUNICATION-CONTROLLER-CONDITIONAL
+    sub:
+        MAC-UNICAST-ADDRESS
+        COUPLING-PORTS
+            COUPLING-PORT
+    parent: ETHERNET-COMMUNICATION-CONTROLLER
+    """
+
+    def __init__(self,
+                 name: str,
+                 mac_unicast_address: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.mac_unicast_address = mac_unicast_address
+        self.coupling_ports: list[CouplingPort] = []
+
+    def add_coupling_port(self, port: CouplingPort) -> None:
+        assert isinstance(port, CouplingPort)
+        port.parent = self
+        self.coupling_ports.append(port)
+
+
+class EthernetCommunicationController(ARElement):
+    """
+    tag: ETHERNET-COMMUNICATION-CONTROLLER
+    sub:
+        SHORT-NAME
+        CATEGORY
+        ETHERNET-COMMUNICATION-CONTROLLER-VARIANTS
+            ETHERNET-COMMUNICATION-CONTROLLER-CONDITIONAL
+    parent: ECU-INSTANCE
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.ethernet_communication_controller_variant: list[EthernetCommunicationControllerConditional] = []
+
+    def add_controller_variant(self, controller: EthernetCommunicationControllerConditional) -> None:
+        assert isinstance(controller, EthernetCommunicationControllerConditional)
+        controller.parent = self
+        self.ethernet_communication_controller_variant.append(controller)
+
+
+class ISignalPort(ARElement):
+    """
+    tag : I-SIGNAL-PORT
+    sub :
+        SHORT-NAME
+        COMMUNICATION-DIRECTION
+    parent: ECH-COMM-PORT-INSTANCES
+    """
+
+    def __init__(self, name: str, communication_direction: str, **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.communication_direction = communication_direction
+
+    def ref(self) -> ISignalPortRef | None:
+        """
+        Returns a reference to this element or
+        None if the element is not yet part of a package
+        """
+        ref_str = self._calc_ref_string()
+        if ref_str is None:
+            return None
+        return ISignalPortRef(ref_str, ar_enum.IdentifiableSubTypes.I_SIGNAL_PORT)
+
+
+class EthernetCommunicationConnector(ARElement):
+    """
+    tag : ETHERNET-COMMUNICATION-CONNECTOR
+    sub :
+        SHORT-NAME
+        CATEGORY
+        COMM-CONTROLLER-REF -> ETHERNET-COMMUNICATION-CONTROLLER
+        ECU-COMM-PORT-INSTANCES
+        NETWORK-ENDPOINT-INSTANCES
+    parent:
+        ECU-INSTANCE
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.comm_controller_ref: EthernetCommunicationControllerRef | None = None
+        self.ecu_comm_port_instances: list[ISignalPort] = []
+        self.network_endpoint_refs: list[NetworkEndpointRef] = []
+
+    def set_comm_controller_ref(self, ref: EthernetCommunicationControllerRef) -> None:
+        assert isinstance(ref, EthernetCommunicationControllerRef)
+        ref.parent = self
+        self.comm_controller_ref = ref
+
+    def add_ecu_comm_port_instances(self, sub: ISignalPort) -> None:
+        assert isinstance(sub, ISignalPort)
+        sub.parent = self
+        self.ecu_comm_port_instances.append(sub)
+
+    def add_network_endpoint_ref(self, ref: NetworkEndpointRef) -> None:
+        assert isinstance(ref, NetworkEndpointRef)
+        ref.parent = self
+        self.network_endpoint_refs.append(ref)
+
+
+class EcuInstance(ARElement):
+    """
+    tag: ECU-INSTANCE
+    sub:
+        SHORT-NAME
+        COMM-CONTROLLERS
+        CONNECTORS
+        SLEEP-MODE-SUPPORTED
+        WAKE-UP-OVER-BUS-SUPPORTED
+    """
+
+    def __init__(self,
+                 name: str,
+                 sleep_mode_supported: bool = False,
+                 wakeup_over_bus_supported: bool = False,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.comm_controllers: list[EthernetCommunicationController] = []
+        self.connectors: list[EthernetCommunicationConnector] = []
+        self.sleep_mode_supported = sleep_mode_supported
+        self.wakeup_over_buf_supported = wakeup_over_bus_supported
+
+    def add_comm_controllers(self, controller: EthernetCommunicationController) -> None:
+        assert isinstance(controller, EthernetCommunicationController)
+        controller.parent = self
+        self.comm_controllers.append(controller)
+
+
+class CouplingElementRef(BaseRef):
+    """
+    tag : FIBEX-ELEMENT-REF
+    dest: COUPLING-ELEMENT
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.COUPLING_ELEMENT)
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.COUPLING_ELEMENT}
+
+
+class DataElementIRef(ARElement):
+    """
+    tag: DATA-ELEMENT-IREF
+    sub:
+        CONTEXT-COMPONENT-REF
+        CONTEXT-COMPOSITION-REF
+        CONTEXT-PORT-REF
+        TARGET-DATA-PROTOTYPE-REF
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.context_component_ref: list[SwComponentTypeRef] = []
+        self.context_composition_ref: list[SwComponentTypeRef] = []
+        self.context_port_ref: list[PortPrototypeRef] = []
+        self.target_data_prototype_ref: list[VariableDataPrototypeRef] = []
+
+    def add_context_component_ref(self, sub: SwComponentTypeRef) -> None:
+        assert isinstance(sub, SwComponentTypeRef)
+        sub.parent = self
+        self.context_component_ref.append(sub)
+
+    def add_context_composition_ref(self, sub: SwComponentTypeRef) -> None:
+        assert isinstance(sub, SwComponentTypeRef)
+        sub.parent = self
+        self.context_composition_ref.append(sub)
+
+    def add_context_port_ref(self, sub: PortPrototypeRef) -> None:
+        assert isinstance(sub, PortPrototypeRef)
+        sub.parent = self
+        self.context_port_ref.append(sub)
+
+    def add_target_data_prototype_ref(self, sub: VariableDataPrototypeRef) -> None:
+        assert isinstance(sub, VariableDataPrototypeRef)
+        sub.parent = self
+        self.target_data_prototype_ref.append(sub)
+
+
+class SenderReceiverToSignalMapping(ARElement):
+    """
+    tag: SENDER-RECEIVER-TO-SIGNAL-MAPPING
+    sub:
+        DATA-ELEMENT-IREF
+    """
+
+    def __init__(self,
+                 name: str,
+                 data_element_iref: DataElementIRef,
+                 **kwargs):
+        super().__init__(name, **kwargs)
+        self.data_element_iref: DataElementIRef = data_element_iref
+
+
+class EcuInstanceRef(BaseRef):
+    """
+    tag : ECU-INSTANCE-REF
+    dest: ECU-INSTANCE
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.ECU_INSTANCE)
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.ECU_INSTANCE}
+
+
+class RootSwCompositionPrototypeRef(BaseRef):
+    """
+    tag: CONTEXT-COMPOSITION-REF
+    dest: ROOT-SW-COMPOSITION-PROTOTYPE
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(value=name, dest=ar_enum.IdentifiableSubTypes.ROOT_SW_COMPOSITION_PROTOTYPE)
+
+    def _accepted_subtypes(self) -> set[ar_enum.IdentifiableSubTypes]:
+        return {ar_enum.IdentifiableSubTypes.ROOT_SW_COMPOSITION_PROTOTYPE}
+
+
+class ComponentIRef(ARElement):
+    """
+    tag: COMPONENT-IREF
+    sub:
+        CONTEXT-COMPOSITION-REF
+        CONTEXT-COMPONENT-REF
+        TARGET-COMPONENT-ERF
+    """
+
+    def __init__(self,
+                 name: str,
+                 context_composition_ref: RootSwCompositionPrototypeRef,
+                 context_component_ref: SwComponentTypeRef,
+                 target_component_ref: SwComponentTypeRef,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.context_composition_ref: RootSwCompositionPrototypeRef = context_composition_ref
+        self.context_component_ref: SwComponentTypeRef = context_component_ref
+        self.target_component_ref: SwComponentTypeRef = target_component_ref
+
+
+class SwcToEcuMapping(ARElement):
+    """
+    tag: SWC-TO-ECU-MAPPING
+    sub:
+        SHORT-NAME
+        COMPONENT-IREFS
+        ECU-INSTANCE-REF
+    """
+
+    def __init__(self,
+                 name: str,
+                 ecu_instance_ref: EcuInstanceRef,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.component_irefs: list[ComponentIRef] = []
+        self.ecu_instance_ref: EcuInstanceRef = ecu_instance_ref
+
+    def add_component_irefs(self, sub: ComponentIRef) -> None:
+        assert isinstance(sub, ComponentIRef)
+        sub.parent = self
+        self.component_irefs.append(sub)
+
+    def set_ecu_instance_ref(self, sub: EcuInstanceRef) -> None:
+        assert isinstance(sub, EcuInstanceRef)
+        sub.parent = self
+        self.ecu_instance_ref = sub
+
+
+class SystemMapping(ARElement):
+    """
+    tag: SYSTEM-MAPPING
+    sub:
+        SHORT-NAME
+        DATA-MAPPINGS
+        SW-MAPPINGS
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict):
+        super().__init__(name, **kwargs)
+        self.data_mappings: list[SenderReceiverToSignalMapping] = []
+        self.sw_mappings: list[SwcToEcuMapping] = []
+
+    def add_data_mapping(self, sub: SenderReceiverToSignalMapping) -> None:
+        assert isinstance(sub, SenderReceiverToSignalMapping)
+        sub.parent = self
+        self.data_mappings.append(sub)
+
+    def add_sw_mapping(self, sub: SwcToEcuMapping) -> None:
+        assert isinstance(sub, SwcToEcuMapping)
+        sub.parent = self
+        self.sw_mappings.append(sub)
+
+
+class RootSwCompositionPrototype(ARElement):
+    """
+    tag: ROOT-SW-COMPOSITION-PROTOTYPE
+    sub:
+        SHORT-NAME
+        SOFTWARE-COMPOSITION-TREF
+    """
+
+    def __init__(self,
+                 name: str,
+                 software_composition_tref: SwComponentTypeRef,
+                 **kwargs: dict,
+                 ):
+        super().__init__(name, **kwargs)
+        self.software_composition_tref: SwComponentTypeRef = software_composition_tref
+
+
+class System(ARElement):
+    """
+    tag: SYSTEM
+    sub:
+        SHORT-NAME
+        CATEGORY
+        FIBEX-ELEMENTS
+        MAPPINGS
+        ROOT-SOFTWARE-COMPOSITIONS
+    """
+
+    def __init__(self,
+                 name: str,
+                 **kwargs: dict
+                 ):
+        super().__init__(name, **kwargs)
+        self.fibex_elements: list[CouplingElementRef] = []
+        self.mappings: list[SystemMapping] = []
+        self.root_software_compositions: list[RootSwCompositionPrototype] = []
+
+    def add_fibex_elements(self, sub: CouplingElementRef) -> None:
+        assert isinstance(sub, CouplingElementRef)
+        sub.parent = self
+        self.fibex_elements.append(sub)
+
+    def add_mapping(self, sub: SystemMapping) -> None:
+        assert isinstance(sub, SystemMapping)
+        sub.parent = self
+        self.mappings.append(sub)
+
+    def add_root_software_composition(self, sub: RootSwCompositionPrototype) -> None:
+        assert isinstance(sub, RootSwCompositionPrototype)
+        sub.parent = self
+        self.root_software_compositions.append(sub)
+
+    class SoAdRoutingGroup(ARElement):
+        """
+        tag : SO-AD-ROUTING-GROUP
+        sub:
+            SHORT-NAME
+            EVENT-GROUP-CONTROL-TYPE
+        """
+
+        def __init__(self,
+                     name: str,
+                     event_group_control_type: str,
+                     **kwargs: dict,
+                     ):
+            super().__init__(name, **kwargs)
+            self.event_group_control_type = event_group_control_type
+
+        def set_event_group_control_type(self, control_type: str) -> None:
+            self.event_group_control_type = control_type
